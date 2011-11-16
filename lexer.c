@@ -116,7 +116,7 @@ token next_tok(char * expr, int i)
                     if (isxdigit(CURR))
                         state = HEX;
                     else {
-                        token error = {T_EOF, i, len, expr};
+                        token error = {T_ERROR, i, len, expr};
                         return error;
                     }
                     break;
@@ -144,7 +144,7 @@ token next_tok(char * expr, int i)
                     if (isdigit(CURR))
                         state = FRAC;
                     else if (len == 1) {
-                        token error = {T_EOF, i, len, expr};
+                        token error = {T_ERROR, i, len, expr};
                         return error;
                     } else if (CURR == 'e' || CURR == 'E')
                         state = EE;
@@ -157,7 +157,7 @@ token next_tok(char * expr, int i)
                     else if (isdigit(CURR))
                         state = EXP;
                     else {
-                        token error = {T_EOF, i, len, expr};
+                        token error = {T_ERROR, i, len, expr};
                         return error;
                     } 
                     break;
@@ -165,7 +165,7 @@ token next_tok(char * expr, int i)
                     if (isdigit(CURR))
                         state = EXP;
                     else {
-                        token error = {T_EOF, i, len, expr};
+                        token error = {T_ERROR, i, len, expr};
                         return error;
                     }
                     break;
@@ -197,6 +197,6 @@ token next_tok(char * expr, int i)
 #undef CURR
     }
 
-    token error = {T_EOF, i, 1, expr};
+    token error = {T_ERROR, i, 1, expr};
     return error;
 }
