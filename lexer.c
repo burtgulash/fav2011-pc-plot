@@ -2,12 +2,10 @@
 #include <string.h>
 #include <ctype.h>
 #include "lexer.h"
+#include "func.h"
 
-
-static char * var_literal = "x";
-
-#define NUM_F 5
-static char * functions[NUM_F]  = {"sin", "cos", "tan", "exp", "log"};
+extern char * functions[NUM_F];
+char * var_literal = "x";
 
 
 static char * operators = "+-*/^";
