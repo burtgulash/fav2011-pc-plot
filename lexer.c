@@ -1,4 +1,6 @@
+#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "lexer.h"
 
 
@@ -27,56 +29,57 @@ static int isoctal(char c)
 enum {ZERO, DOT, FRAC, DEC, XX, EE, OCT, HEX, EXP, EXP_SIGN, 
       DEC_MATCHED, OCT_MATCHED, HEX_MATCHED, FLOAT_MATCHED};
 
-token next_tok(char * expr, int i)
+
+token * make_tok(int type, int pos, int len, char * expr)
+{
+    token * tok = (token*) malloc(sizeof(token));
+
+    tok->type   = type;
+    tok->pos    = pos;
+    tok->len    = len;
+    tok->expr   = expr;
+
+    return tok;
+}
+
+
+token * next_tok(char * expr, int i)
 {
     char c = expr[i];
-    int len;
+    int f, f_len, len, var_len, state;
 
-    if (!c) {
-        token eof = {T_EOF, i, 1, expr};
-        return eof;
-    }
+    if (!c)
+        return make_tok(T_EOF, i, 1, expr);
 
     if (c == '(') {
-        token lparen = {T_LPAREN, i, 1, expr};
-        return lparen;
+        return make_tok(T_LPAREN, i, 1, expr);
     } else if (c == ')') {
-        token rparen = {T_RPAREN, i, 1, expr};
-        return rparen;
+        return make_tok(T_RPAREN, i, 1, expr);
     } else if (isoperator(c)) {
-        token op = {T_OP, i, 1, expr};
-        return op;
+        return make_tok(T_OP, i, 1, expr);
     } else if (isspace(c)) { 
         len = 1;
         while (isspace(expr[i + len]))
             len++;
-        token space = {T_SPACE, i, len, expr};
-        return space;
+        return make_tok(T_SPACE, i, len, expr);
     } else if (isalpha(c)) {
         len = 1;
         while (isalpha(expr[i + len]))
             len++;
 
-        int var_len = strlen(var_literal);
-        if (len == var_len && strncmp(expr + i, var_literal, var_len) == 0) {
-            token var = {T_VAR, i, len, expr};
-            return var;
-        } 
+        var_len = strlen(var_literal);
+        if (len == var_len && strncmp(expr + i, var_literal, var_len) == 0)
+            return make_tok(T_VAR, i, len, expr);
 
-        size_t f;
         for (f = 0; f < NUM_F; f++) {
-            int f_len = strlen(functions[f]);
-            if (len == f_len && strncmp(expr + i, functions[f], f_len) == 0) {
-                token fun = {T_FUN, i, len, expr};
-                return fun;
-            }
+            f_len = strlen(functions[f]);
+            if (len == f_len && strncmp(expr + i, functions[f], f_len) == 0)
+                return make_tok(T_FUN, i, len, expr);
         }
 
-        token error = {T_ERROR, i, len, expr};
-        return error;
+        return make_tok(T_ERROR, i, len, expr);
     } else if (isdigit(c) || c == '.') {
         len = 0;
-        int state;
 
 #define CURR expr[i + len]
 
@@ -87,7 +90,6 @@ token next_tok(char * expr, int i)
         else
             state = DEC;
 
-        int j;
         while (1) {
             len ++;
 
@@ -115,10 +117,8 @@ token next_tok(char * expr, int i)
                 case XX:
                     if (isxdigit(CURR))
                         state = HEX;
-                    else {
-                        token error = {T_ERROR, i, len, expr};
-                        return error;
-                    }
+                    else
+                        return make_tok(T_ERROR, i, len, expr);
                     break;
                 case HEX:
                     if (isxdigit(CURR))
@@ -143,10 +143,9 @@ token next_tok(char * expr, int i)
                 case FRAC:
                     if (isdigit(CURR))
                         state = FRAC;
-                    else if (len == 1) {
-                        token error = {T_ERROR, i, len, expr};
-                        return error;
-                    } else if (CURR == 'e' || CURR == 'E')
+                    else if (len == 1)
+                        return make_tok(T_ERROR, i, len, expr);
+                    else if (CURR == 'e' || CURR == 'E')
                         state = EE;
                     else
                         state = FLOAT_MATCHED;
@@ -156,18 +155,14 @@ token next_tok(char * expr, int i)
                         state = EXP_SIGN;
                     else if (isdigit(CURR))
                         state = EXP;
-                    else {
-                        token error = {T_ERROR, i, len, expr};
-                        return error;
-                    } 
+                    else
+                        return make_tok(T_ERROR, i, len, expr);
                     break;
                 case EXP_SIGN:
                     if (isdigit(CURR))
                         state = EXP;
-                    else {
-                        token error = {T_ERROR, i, len, expr};
-                        return error;
-                    }
+                    else
+                        return make_tok(T_ERROR, i, len, expr);
                     break;
                 case EXP:
                     if (isdigit(CURR))
@@ -176,27 +171,22 @@ token next_tok(char * expr, int i)
                         state = FLOAT_MATCHED;
                     break;
 
-                case DEC_MATCHED:;
-                    token dec = {T_DEC, i, len - 1, expr};
-                    return dec;
+                case DEC_MATCHED:
+                    return make_tok(T_DEC, i, len - 1, expr);
 
-                case OCT_MATCHED:;
-                    token oct = {T_OCT, i, len - 1, expr};
-                    return oct;
+                case OCT_MATCHED:
+                    return make_tok(T_OCT, i, len - 1, expr);
 
-                case HEX_MATCHED:;
-                    token hex = {T_HEX, i, len - 1, expr};
-                    return hex;
+                case HEX_MATCHED:
+                    return make_tok(T_HEX, i, len - 1, expr);
 
-                case FLOAT_MATCHED:;
-                    token flo = {T_FLOAT, i, len - 1, expr};
-                    return flo;
+                case FLOAT_MATCHED:
+                    return make_tok(T_FLOAT, i, len - 1, expr);
             }
         }
 
 #undef CURR
     }
 
-    token error = {T_ERROR, i, 1, expr};
-    return error;
+    return make_tok(T_ERROR, i, 1, expr);
 }
