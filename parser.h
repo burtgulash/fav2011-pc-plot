@@ -15,4 +15,7 @@ typedef struct {
 
 enum {NUM, VAR, OP, LPAREN, RPAREN};
 
+
+symbol ** parse (char * expr);
+
 #endif

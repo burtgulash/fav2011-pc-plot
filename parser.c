@@ -87,7 +87,8 @@ symbol ** parse (char * expr)
                     if (PEEK()->op.assoc == LEFT && 
                                             PEEK()->op.prec > sym->op.prec)
                         ENQUEUE(POP());
-                    else if (PEEK()->op.prec >= sym->op.prec)
+                    else if (PEEK()->op.assoc == RIGHT && 
+                                            PEEK()->op.prec >= sym->op.prec)
                         ENQUEUE(POP());
                     else
                         break;

@@ -19,18 +19,23 @@ Operator match_operator(char c)
         case '-':
             op.prec = 1;
             op.assoc = LEFT;
+            break;
         case '+':
             op.prec = 2;
             op.assoc = LEFT;
+            break;
         case '/':
             op.prec = 3;
             op.assoc = LEFT;
+            break;
         case '*':
             op.prec = 4;
             op.assoc = LEFT;
+            break;
         case '^':
             op.prec = 5;
             op.assoc = RIGHT;
+            break;
     }
 
     return op;

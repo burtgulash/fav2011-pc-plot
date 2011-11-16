@@ -1,43 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "lexer.h"
+#include "parser.h"
 
 
 int main(int argc, char ** argv)
 {
+    symbol * s;
+    int i = 0;
     if (argc == 2) {
-        token * t = NULL;
-        int i = 0;
-        do {
-            if (t)
-                free(t);
-            t = next_tok(argv[1], i);
-            i += t->len;
+        symbol ** parsed = parse(argv[1]);
+        if (!parsed)
+            return 1;
+        while (1) {
+            s = parsed[i++];
+            if (!s)
+                break;
 
-            switch (t->type) {
-                case T_ERROR:
-                    printf("token error"); break;
-                case T_FLOAT:
-                    printf("float"); break;
-                case T_DEC:
-                    printf("decimal"); break;
-                case T_SPACE:
-                    printf("space"); break;
-                case T_EOF:
-                    printf("eof"); break;
-                case T_VAR:
-                    printf("var"); break;
-                case T_FUN:
-                    printf("fun"); break;
-                case T_OP:
-                    printf("operator"); break;
-                case T_LPAREN:
-                    printf("left parenthesis"); break;
-                case T_RPAREN:
-                    printf("right parenthesis"); break;
+            switch (s->type) {
+                case NUM:
+                    printf("number: %f\n", s->number);
+                    break;
+                case VAR:
+                    printf("var   : %s\n", "x");
+                    break;
+                case OP:
+                    printf("opera : %d\n", s->op.prec);
+                    break;
             }
-            printf (" at %d, %s\n", t->pos, t->expr + t->pos);
-        } while (t->type != T_EOF);
+        }
     }
     return 0;
 }
