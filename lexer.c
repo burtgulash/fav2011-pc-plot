@@ -1,25 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "lexer.h"
 
-#define END -1
-
-typedef enum {T_HEX, T_OCT, T_DEC, T_FLOAT, T_VAR, T_FUN, T_OP, 
-              T_LPAREN, T_RPAREN, T_ERROR, T_EOF, T_SPACE} t_type;
 
 static char * var_literal = "x";
 
 #define NUM_F 5
 static char * functions[NUM_F]  = {"sin", "cos", "tan", "exp", "log"};
 
-typedef struct {
-    t_type type;
-    int pos, len;
-    char * expr;
-} token;
 
 static char * operators = "+-*/^";
-int isoperator(char c) 
+static int isoperator(char c) 
 {
     int i;
     for (i = 0; i < 5; i++)
@@ -27,6 +19,12 @@ int isoperator(char c)
             return 1;
     return 0;
 }
+
+static int isoctal(char c)
+{
+    return '0' <= c && c < '8';
+}
+
 
 typedef enum {ZERO, DOT, FRAC, DEC, XX, EE, OCT, HEX, EXP, EXP_SIGN, 
               DEC_MATCHED, OCT_MATCHED, HEX_MATCHED, FLOAT_MATCHED} state;
@@ -47,7 +45,7 @@ token next_tok(char * expr, int i)
     } else if (c == ')') {
         token rparen = {T_RPAREN, i, 1, expr};
         return rparen;
-    } if (isoperator(c)) {
+    } else if (isoperator(c)) {
         token op = {T_OP, i, 1, expr};
         return op;
     } else if (isspace(c)) { 
@@ -83,7 +81,6 @@ token next_tok(char * expr, int i)
         state s;
 
 #define CURR expr[i + len]
-#define isoctal(x) ('0' <= (x) && (x) < '8')
 
         if (CURR == '.')
             s = FRAC;
@@ -199,7 +196,6 @@ token next_tok(char * expr, int i)
             }
         }
 
-#undef isoctal
 #undef CURR
     }
 
