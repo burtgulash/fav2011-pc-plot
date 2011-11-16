@@ -2,22 +2,17 @@
 #define PARSER_H
 
 typedef struct {
-    int precedence, associativity;
+    int prec, assoc;
     double (*eval) (double a, double b);
-} binary_op;
-
-typedef struct {
-    int precedence;
-    double (*eval) (double a);
-} unary_op;
+} Operator;
 
 typedef struct {
     int type;
     double number;
-    binary_op b_op;
-    unary_op u_op;
+    int prec;
+    Operator op;
 } symbol;
 
-enum {NUM, VAR, BIN_OP, UN_OP};
+enum {NUM, VAR, OP, LPAREN, RPAREN};
 
 #endif

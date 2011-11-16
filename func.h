@@ -4,6 +4,9 @@
 
 #define NUM_F 5
 
-unary_op match_unary(char * fun_str);
+Operator match_operator(char c);
+Operator match_fun(char * fun_str);
+
+enum {LEFT, RIGHT};
 
 #endif

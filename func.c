@@ -5,14 +5,45 @@
 
 char * functions[NUM_F] = {"sin", "cos", "tan", "exp", "log"};
 
-unary_op match_unary(char * fun_str)
+double Sin(double a, double b)
 {
-	unary_op u_op;
-	u_op.precedence = 6;
+    return sin(a);
+}
 
-	if (strcmp(fun_str, "sin") == 0)
-		u_op.eval = sin;
 
-	return u_op;
+Operator match_operator(char c)
+{
+    Operator op;
+
+    switch (c) {
+        case '-':
+            op.prec = 1;
+            op.assoc = LEFT;
+        case '+':
+            op.prec = 2;
+            op.assoc = LEFT;
+        case '/':
+            op.prec = 3;
+            op.assoc = LEFT;
+        case '*':
+            op.prec = 4;
+            op.assoc = LEFT;
+        case '^':
+            op.prec = 5;
+            op.assoc = RIGHT;
+    }
+
+    return op;
+}
+
+Operator match_fun(char * fun_str)
+{
+    Operator op;
+    op.prec = 6;
+
+    if (strcmp(fun_str, "sin") == 0)
+        op.eval = Sin;
+
+    return op;
 }
 
