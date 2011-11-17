@@ -9,8 +9,6 @@ int main(int argc, char ** argv)
     int i;
     if (argc == 2) {
         parsed_expr parsed = parse(argv[1]);
-        if (parsed.length == 0)
-            return 1;
         for (i = 0; i < parsed.length; i++) {
             s = parsed.expr[i];
 
@@ -26,6 +24,9 @@ int main(int argc, char ** argv)
                     break;
             }
         }
+
+		delete(parsed);
     }
+
     return 0;
 }

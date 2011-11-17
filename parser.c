@@ -12,20 +12,29 @@ static symbol ** stack;
 #define POP()   stack[--sp]
 #define PEEK()  stack[sp - 1]
 
+static token ** tokens;
+static symbol ** symbols;
+static int num_tok = 0;
+static int num_sym = 0;
 
-void delete(int length, symbol ** structure)
+void delete(parsed_expr p)
 {
 	int i;
-	for (i = 0; i < length; i++)
-		if (structure[i] != NULL) {
-			if (structure[i]->tok != NULL) {
-				free(structure[i]->tok);
-				structure[i]->tok = NULL;
-			}
-			free(structure[i]);
-			structure[i] = NULL;
-		}
-	free(structure);
+	for (i = 0; i < num_tok; i++)
+		free(tokens[i]);
+	for (i = 0; i < num_sym; i++)
+		free(symbols[i]);
+
+	if (p.expr)
+		free(p.expr);
+	free(stack);
+	free(tokens);
+	free(symbols);
+
+	stack = NULL;
+	p.expr = NULL;
+	tokens = NULL;
+	symbols = NULL;
 }
 
 parsed_expr parse_error(token * tok, const char * error_msg)
@@ -43,8 +52,11 @@ symbol * make_symbol(int type, token * tok, double number)
     sym->type = type;
     sym->number = number;
 
+	symbols[num_sym++] = sym;
+
     return sym;
 }
+
 
 parsed_expr check(int length, symbol ** queue)
 {
@@ -59,37 +71,31 @@ parsed_expr check(int length, symbol ** queue)
 		sym = queue[i];
 		if (sym->type == OP) {
 			if (sp <= 0) {
-				result = parse_error(sym->tok, "Missing first operand"); 
-				delete(length, output);
-				delete(sp, stack);
-				free(output);	
-				return result;
+				free(queue);
+				free(output);
+				return parse_error(sym->tok, "Missing first operand"); 
 			}
+
 			tmp = POP();
 			if (tmp->type != NUM && tmp->type != VAR) {
-				result = parse_error(sym->tok, "Number or variable expected"); 
-				delete(length, queue);
-				delete(sp, stack);
+				free(queue);
 				free(output);
-				return result;
+				return parse_error(sym->tok, "Number or variable expected"); 
 			}
+
 
 			if (sym->op.binary) {
 				if (sp <= 0) {
-					result = parse_error(sym->tok, "Missing second operand"); 
-					delete(length, queue);
-					delete(sp, stack);
+					free(queue);
 					free(output);
-					return result;
+					return parse_error(sym->tok, "Missing second operand"); 
 				}
+
 				tmp = POP();
 				if (tmp->type != NUM && tmp->type != VAR) {
-					result = parse_error(sym->tok, 
-                                        "Number or variable expected"); 
-					delete(length, queue);
-					delete(sp, stack);
+					free(queue);
 					free(output);
-					return result;
+					return parse_error(sym->tok, "Number or variable expected");
 				}
 			}
 			
@@ -105,16 +111,12 @@ parsed_expr check(int length, symbol ** queue)
 
 	/* there must be one number left on the stack */
 	if (sp != 1) {
-		printf("sp: %d\n", sp);
-		result = parse_error(sym->tok, "Missing operator"); 
-		delete(length, queue);
-		delete(sp, stack);
+		free(queue);
 		free(output);
-		return result;
+		return parse_error(sym->tok, "Missing operator"); 
 	}
 	
 
-	free(stack);
 	free(queue);
 
 	result.length = length;
@@ -130,7 +132,7 @@ parsed_expr parse (char * expr)
 #define ENQUEUE(x) queue[qp++] = (x)
 
     int qp = 0, sp = 0;
-    int i = 0, eof = 0, last = T_LPAREN;
+    int i = 0, eof = 0, last = LPAREN;
 
     token * t;
 	parsed_expr err;
@@ -139,13 +141,19 @@ parsed_expr parse (char * expr)
     char *tmp;
     symbol *sym;
 
-	stack = (symbol**) calloc(expr_len, sizeof(symbol*));
+	stack   = (symbol**) calloc(expr_len, sizeof(symbol*));
+	symbols = (symbol**) calloc(expr_len, sizeof(symbol*));
+	/* eof token +1 */
+	tokens  = (token**)  calloc(expr_len + 1, sizeof(token*));
 
     do {
         t = next_tok(expr, i);
+		tokens[num_tok++] = t;
+
         tmp = (char*) malloc(sizeof(char) * (t->len + 1));
         strncpy(tmp, expr + t->pos, t->len);
         tmp[t->len] = '\0';
+
 
         switch (t->type) {
             case T_HEX:
@@ -201,22 +209,25 @@ parsed_expr parse (char * expr)
             case T_RPAREN:
                 while (sp > 0 && PEEK()->type != LPAREN)
                     ENQUEUE(POP());
+
                 if (sp == 0) {
-                    err =  parse_error(t, "Missing parenthesis");
-					delete(expr_len, queue);
-					delete(sp, stack);
-					return err;
+					free(queue);
+					free(tmp);
+					return parse_error(t, "Missing parenthesis");
 				}
 
-                /* pop LPAREN */
-                sp--;    
+				sym = POP();
                 break;
 
             case T_ERROR:
-                err = parse_error(t, "Token error");
-				delete(expr_len, queue);
-				delete(sp, stack);
-				return err;
+				free(queue);
+				free(tmp);
+                return parse_error(t, "Token error");
+
+			case T_SPACE:
+				i += t->len;
+				free(tmp);
+				continue;
 
             case T_EOF:
                 eof = 1;
@@ -224,8 +235,7 @@ parsed_expr parse (char * expr)
         }
 
         i += t->len;
-        if (t->type != T_SPACE)
-            last = t->type;
+		last = t->type;
 
         free(tmp);
     } while (!eof);
@@ -233,10 +243,8 @@ parsed_expr parse (char * expr)
     /* clear the stack */
     while (sp > 0) {
         if (PEEK()->type == LPAREN || PEEK()->type == RPAREN) {
-            err = parse_error(t, "Missing parenthesis");
-			delete(expr_len, queue);
-			delete(sp, stack);
-			return err;
+			free(queue);
+            return parse_error(t, "Missing parenthesis");
 		}
         ENQUEUE(POP());
     }
