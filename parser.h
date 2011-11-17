@@ -1,5 +1,6 @@
 #ifndef PARSER_H
 #define PARSER_H
+#include "lexer.h"
 
 typedef struct {
     int prec, assoc, binary;
@@ -8,6 +9,7 @@ typedef struct {
 
 typedef struct {
     int type;
+	token * tok;
     double number;
     Operator op;
 } symbol;
