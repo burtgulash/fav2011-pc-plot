@@ -6,15 +6,13 @@
 int main(int argc, char ** argv)
 {
     symbol * s;
-    int i = 0;
+    int i;
     if (argc == 2) {
-        symbol ** parsed = parse(argv[1]);
-        if (!parsed)
+        parsed_expr parsed = parse(argv[1]);
+        if (parsed.length == 0)
             return 1;
-        while (1) {
-            s = parsed[i++];
-            if (!s)
-                break;
+        for (i = 0; i < parsed.length; i++) {
+            s = parsed.expr[i];
 
             switch (s->type) {
                 case NUM:

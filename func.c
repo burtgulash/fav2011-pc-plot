@@ -11,26 +11,26 @@ double Sin(double a, double b)
 }
 
 
-Operator match_operator(char c)
+Operator match_operator(char c, int last)
 {
     Operator op;
+    op.assoc = LEFT;
+    op.binary = 1;
 
     switch (c) {
         case '-':
+            if (last == T_LPAREN || last == T_OP)
+                op.binary = 0;
             op.prec = 1;
-            op.assoc = LEFT;
             break;
         case '+':
             op.prec = 2;
-            op.assoc = LEFT;
             break;
         case '/':
             op.prec = 3;
-            op.assoc = LEFT;
             break;
         case '*':
             op.prec = 4;
-            op.assoc = LEFT;
             break;
         case '^':
             op.prec = 5;
@@ -45,6 +45,8 @@ Operator match_fun(char * fun_str)
 {
     Operator op;
     op.prec = 6;
+    op.assoc = LEFT;
+    op.binary = 0;
 
     if (strcmp(fun_str, "sin") == 0)
         op.eval = Sin;

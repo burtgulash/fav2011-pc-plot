@@ -6,10 +6,15 @@
 #include "parser.h"
 
 
-symbol ** parse_error(token * tok, const char * error_msg)
+
+parsed_expr parse_error(token * tok, const char * error_msg)
 {
+    parsed_expr error_expr = {0, NULL};
+
     fprintf(stderr, "%s: \n", error_msg);
-    return NULL;
+    free(tok);
+
+    return error_expr;
 }
 
 symbol * make_symbol(int type, double number)
@@ -23,25 +28,28 @@ symbol * make_symbol(int type, double number)
 }
 
 
-symbol ** parse (char * expr)
+parsed_expr parse (char * expr)
 {
     int expr_len = strlen(expr);
-    symbol ** output = (symbol**) malloc(sizeof(symbol*) * (expr_len + 1));
-    symbol ** op_stack = (symbol**) malloc(sizeof(symbol*) * (expr_len + 1));
+    symbol ** queue = (symbol**) malloc(sizeof(symbol*) * expr_len);
+    symbol ** parse_stack  = (symbol**) malloc(sizeof(symbol*) * expr_len);
+    symbol ** eval_stack  = (symbol**) malloc(sizeof(symbol*) * expr_len);
 
-    int q_length = 0;
-    int sp       = 0;
-#define ENQUEUE(x) output[q_length++] = (x)
-#define PUSH(x) op_stack[sp++] = (x)
-#define PEEK() op_stack[sp - 1]
-#define POP()  op_stack[--sp]
+#define ENQUEUE(x) queue[qp++] = (x)
 
+#define P_PUSH(x) parse_stack[sp++] = (x)
+#define P_POP()   parse_stack[--sp]
+#define P_PEEK()  parse_stack[sp - 1]
+
+    int qp = 0, sp = 0;
+    int i = 0, eof = 0, last = T_LPAREN;
+
+    parsed_expr result;
     token * t = NULL;
-    int i = 0, eof = 0;
 
     double number;
-    char * tmp;
-    symbol * sym;
+    char *tmp;
+    symbol *sym;
 
     do {
         t = next_tok(expr, i);
@@ -72,39 +80,37 @@ symbol ** parse (char * expr)
             case T_FUN:
                 sym = make_symbol(OP, 0);
                 sym->op = match_fun(tmp);
-
-                while (sp > 0)
-                    ENQUEUE(POP());
-
-                PUSH(sym);
+                P_PUSH(sym);
                 break;
 
             case T_OP:
                 sym = make_symbol(OP, 0);
-                sym->op = match_operator(tmp[0]);
+                sym->op = match_operator(tmp[0], last);
 
-                while (sp > 0 && PEEK()->type == OP) {
-                    if (PEEK()->op.assoc == LEFT && 
-                                            PEEK()->op.prec > sym->op.prec)
-                        ENQUEUE(POP());
-                    else if (PEEK()->op.assoc == RIGHT && 
-                                            PEEK()->op.prec >= sym->op.prec)
-                        ENQUEUE(POP());
-                    else
-                        break;
+                if (sym->op.binary) {
+                    while (sp > 0 && P_PEEK()->type == OP) {
+                        if (P_PEEK()->op.assoc == LEFT && 
+                                P_PEEK()->op.prec >= sym->op.prec)
+                            ENQUEUE(P_POP());
+                        else if (P_PEEK()->op.assoc == RIGHT && 
+                                P_PEEK()->op.prec > sym->op.prec)
+                            ENQUEUE(P_POP());
+                        else
+                            break;
+                    }
                 }
 
-                PUSH(sym);
+                P_PUSH(sym);
                 break;
 
             case T_LPAREN:
                 sym = make_symbol(LPAREN, 0);
-                PUSH(sym);
+                P_PUSH(sym);
                 break;
 
             case T_RPAREN:
-                while (sp > 0 && PEEK()->type != LPAREN)
-                    ENQUEUE(POP());
+                while (sp > 0 && P_PEEK()->type != LPAREN)
+                    ENQUEUE(P_POP());
                 if (sp == 0)
                     return parse_error(t, "Missing parenthesis");
                 /* pop LPAREN */
@@ -120,19 +126,25 @@ symbol ** parse (char * expr)
                 break;
         }
 
-        free(tmp);
         i += t->len;
+        if (t->type != T_SPACE)
+            last = t->type;
+
+        free(tmp);
         free(t);
     } while (!eof);
 
     /* clear the stack */
     while (sp > 0) {
-        if (PEEK()->type == LPAREN || PEEK()->type == RPAREN)
-            return parse_error(t, "Mismatched parenthesis");
-        ENQUEUE(POP());
+        if (P_PEEK()->type == LPAREN || P_PEEK()->type == RPAREN)
+            return parse_error(t, "Missing parenthesis");
+        ENQUEUE(P_POP());
     }
 
-    /* append parse EOF */
-    ENQUEUE(NULL);
-    return output;
+    free(parse_stack);
+    free(eval_stack);
+
+    result.length = qp;
+    result.expr   = queue;
+    return result;
 }
