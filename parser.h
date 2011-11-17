@@ -9,7 +9,7 @@ typedef struct {
 
 typedef struct {
     int type;
-	token * tok;
+    token * tok;
     double number;
     Operator op;
 } symbol;

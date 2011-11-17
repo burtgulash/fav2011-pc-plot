@@ -7,7 +7,7 @@ enum {T_HEX, T_OCT, T_DEC, T_FLOAT, T_VAR, T_FUN, T_OP,
 typedef struct {
     int type;
     int pos, len;
-    char * expr;
+    char * context;
 } token;
 
 token * next_tok(char * expr, int i);

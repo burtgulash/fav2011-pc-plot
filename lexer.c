@@ -28,14 +28,14 @@ enum {ZERO, DOT, FRAC, DEC, XX, EE, OCT, HEX, EXP, EXP_SIGN,
       DEC_MATCHED, OCT_MATCHED, HEX_MATCHED, FLOAT_MATCHED};
 
 
-token * make_tok(int type, int pos, int len, char * expr)
+token * make_tok(int type, int pos, int len, char * context)
 {
     token * tok = (token*) malloc(sizeof(token));
 
     tok->type   = type;
     tok->pos    = pos;
     tok->len    = len;
-    tok->expr   = expr;
+    tok->context   = context;
 
     return tok;
 }

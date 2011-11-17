@@ -14,18 +14,35 @@ int main(int argc, char ** argv)
 
             switch (s->type) {
                 case NUM:
-                    printf("number: %f\n", s->number);
+                    printf(" %.2f", s->number);
                     break;
                 case VAR:
-                    printf("var   : %s\n", "x");
+                    printf(" x");
                     break;
                 case OP:
-                    printf("opera : %d\n", s->op.prec);
+                    switch (s->op.prec) {
+                        case 1:
+                            printf(" -");
+                            break;
+                        case 2:
+                            printf(" +");
+                            break;
+                        case 3:
+                            printf(" /");
+                            break;
+                        case 4:
+                            printf(" *");
+                            break;
+                        case 5:
+                            printf(" ^");
+                            break;
+                    }
                     break;
             }
         }
+        printf("\n");
 
-		delete(parsed);
+        delete(parsed);
     }
 
     return 0;

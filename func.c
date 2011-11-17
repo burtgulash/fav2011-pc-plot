@@ -19,9 +19,9 @@ Operator match_operator(char c, int last)
 
     switch (c) {
         case '-':
-            if (last == LPAREN || last == OP)
-                op.binary = 0;
             op.prec = 1;
+            if (last == T_LPAREN || last == T_OP)
+                op.binary = 0;
             break;
         case '+':
             op.prec = 2;

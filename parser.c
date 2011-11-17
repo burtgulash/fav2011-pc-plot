@@ -19,28 +19,29 @@ static int num_sym = 0;
 
 void delete(parsed_expr p)
 {
-	int i;
-	for (i = 0; i < num_tok; i++)
-		free(tokens[i]);
-	for (i = 0; i < num_sym; i++)
-		free(symbols[i]);
+    int i;
+    for (i = 0; i < num_tok; i++)
+        free(tokens[i]);
+    for (i = 0; i < num_sym; i++)
+        free(symbols[i]);
 
-	if (p.expr)
-		free(p.expr);
-	free(stack);
-	free(tokens);
-	free(symbols);
+    if (p.expr)
+        free(p.expr);
+    free(stack);
+    free(tokens);
+    free(symbols);
 
-	stack = NULL;
-	p.expr = NULL;
-	tokens = NULL;
-	symbols = NULL;
+    stack = NULL;
+    p.expr = NULL;
+    tokens = NULL;
+    symbols = NULL;
 }
 
 parsed_expr parse_error(token * tok, const char * error_msg)
 {
     parsed_expr error_expr = {0, NULL};
-    fprintf(stderr, "%s: \n", error_msg);
+    fprintf(stderr, "%s: %s\n", error_msg, tok->context);
+    fprintf(stderr, "%*s^\n", strlen(error_msg) + 2 + tok->pos, "");
 
     return error_expr;
 }
@@ -49,10 +50,11 @@ symbol * make_symbol(int type, token * tok, double number)
 {
     symbol * sym = (symbol*) malloc(sizeof(symbol));
 
-    sym->type = type;
+    sym->type   = type;
+    sym->tok    = tok;
     sym->number = number;
 
-	symbols[num_sym++] = sym;
+    symbols[num_sym++] = sym;
 
     return sym;
 }
@@ -60,68 +62,62 @@ symbol * make_symbol(int type, token * tok, double number)
 
 parsed_expr check(int length, symbol ** queue)
 {
-	parsed_expr result;
+    parsed_expr result;
 
-	int i, qp = 0, sp = 0;
-	symbol *sym, *tmp;
+    int i, qp = 0, sp = 0;
+    symbol *sym, *tmp;
     symbol ** output = (symbol**) calloc(length, sizeof(symbol*));
 #define ENQUEUE(x) output[qp++] = (x)
-	
-	for (i = 0; i < length; i++) {
-		sym = queue[i];
-		if (sym->type == OP) {
-			if (sp <= 0) {
-				free(queue);
-				free(output);
-				return parse_error(sym->tok, "Missing first operand"); 
-			}
 
-			tmp = POP();
-			if (tmp->type != NUM && tmp->type != VAR) {
-				free(queue);
-				free(output);
-				return parse_error(sym->tok, "Number or variable expected"); 
-			}
+    for (i = 0; i < length; i++) {
+        sym = queue[i];
+        if (sym->type == OP) {
+            if (sp <= 0) {
+                free(queue);
+                free(output);
+                return parse_error(sym->tok, "Missing first operand"); 
+            }
+
+            tmp = POP();
+            if (tmp->type != NUM && tmp->type != VAR) {
+                free(queue);
+                free(output);
+                return parse_error(sym->tok, "Number or variable expected"); 
+            }
 
 
-			if (sym->op.binary) {
-				if (sp <= 0) {
-					free(queue);
-					free(output);
-					return parse_error(sym->tok, "Missing second operand"); 
-				}
+            if (sym->op.binary) {
+                if (sp <= 0) {
+                    free(queue);
+                    free(output);
+                    return parse_error(sym->tok, "Missing second operand"); 
+                }
 
-				tmp = POP();
-				if (tmp->type != NUM && tmp->type != VAR) {
-					free(queue);
-					free(output);
-					return parse_error(sym->tok, "Number or variable expected");
-				}
-			}
-			
-			PUSH(tmp);
-		} else if (sym->type == NUM || sym->type == VAR) {
-			PUSH(sym);
-		}
+                tmp = POP();
+                if (tmp->type != NUM && tmp->type != VAR) {
+                    free(queue);
+                    free(output);
+                    return parse_error(sym->tok, "Number or variable expected");
+                }
+            }
 
-		ENQUEUE(sym);
-	}
+            PUSH(tmp);
+        } else if (sym->type == NUM || sym->type == VAR) {
+            PUSH(sym);
+        }
+
+        ENQUEUE(sym);
+    }
 
 #undef ENQUEUE
 
-	/* there must be one number left on the stack */
-	if (sp != 1) {
-		free(queue);
-		free(output);
-		return parse_error(sym->tok, "Missing operator"); 
-	}
-	
 
-	free(queue);
 
-	result.length = length;
-	result.expr   = output;
-	return result;
+    free(queue);
+
+    result.length = length;
+    result.expr   = output;
+    return result;
 }
 
 
@@ -132,23 +128,22 @@ parsed_expr parse (char * expr)
 #define ENQUEUE(x) queue[qp++] = (x)
 
     int qp = 0, sp = 0;
-    int i = 0, eof = 0, last = LPAREN;
+    int i = 0, eof = 0, last = T_LPAREN;
 
     token * t;
-	parsed_expr err;
 
     double number;
     char *tmp;
     symbol *sym;
 
-	stack   = (symbol**) calloc(expr_len, sizeof(symbol*));
-	symbols = (symbol**) calloc(expr_len, sizeof(symbol*));
-	/* eof token +1 */
-	tokens  = (token**)  calloc(expr_len + 1, sizeof(token*));
+    stack   = (symbol**) calloc(expr_len, sizeof(symbol*));
+    symbols = (symbol**) calloc(expr_len, sizeof(symbol*));
+    /* eof token +1 */
+    tokens  = (token**)  calloc(expr_len + 1, sizeof(token*));
 
     do {
         t = next_tok(expr, i);
-		tokens[num_tok++] = t;
+        tokens[num_tok++] = t;
 
         tmp = (char*) malloc(sizeof(char) * (t->len + 1));
         strncpy(tmp, expr + t->pos, t->len);
@@ -211,23 +206,23 @@ parsed_expr parse (char * expr)
                     ENQUEUE(POP());
 
                 if (sp == 0) {
-					free(queue);
-					free(tmp);
-					return parse_error(t, "Missing parenthesis");
-				}
+                    free(queue);
+                    free(tmp);
+                    return parse_error(t, "Missing parenthesis");
+                }
 
-				sym = POP();
+                sym = POP();
                 break;
 
             case T_ERROR:
-				free(queue);
-				free(tmp);
-                return parse_error(t, "Token error");
+                free(queue);
+                free(tmp);
+                return parse_error(t, "Unknown symbol");
 
-			case T_SPACE:
-				i += t->len;
-				free(tmp);
-				continue;
+            case T_SPACE:
+                i += t->len;
+                free(tmp);
+                continue;
 
             case T_EOF:
                 eof = 1;
@@ -235,7 +230,7 @@ parsed_expr parse (char * expr)
         }
 
         i += t->len;
-		last = t->type;
+        last = t->type;
 
         free(tmp);
     } while (!eof);
@@ -243,9 +238,9 @@ parsed_expr parse (char * expr)
     /* clear the stack */
     while (sp > 0) {
         if (PEEK()->type == LPAREN || PEEK()->type == RPAREN) {
-			free(queue);
+            free(queue);
             return parse_error(t, "Missing parenthesis");
-		}
+        }
         ENQUEUE(POP());
     }
 
