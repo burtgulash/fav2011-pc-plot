@@ -150,35 +150,64 @@ parsed_expr parse (char * expr)
         tmp[t->len] = '\0';
 
 
+#define SYNTAX_ERROR() { \
+                           free(queue); \
+                           free(tmp); \
+                           return parse_error(t, "Syntax error"); \
+                       }
+
+#define NUMERIC(x) ((x) == T_VAR || (x) == T_HEX || (x) == T_OCT || \
+                    (x) == T_DEC || (x) == T_FLOAT)
+
         switch (t->type) {
             case T_HEX:
             case T_DEC:
             case T_OCT:
+                if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
+                    SYNTAX_ERROR();
+
                 number = (double) strtoul(tmp, NULL, 0);
                 sym = make_symbol(NUM, t, number);
                 ENQUEUE(sym);
                 break;
 
             case T_FLOAT:
+                if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
+                    SYNTAX_ERROR();
+
                 number = (double) strtod(tmp, NULL);
                 sym = make_symbol(NUM, t, number);
                 ENQUEUE(sym);
                 break;
 
             case T_VAR:
+                if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
+                    SYNTAX_ERROR();
+
                 sym = make_symbol(VAR, t, 0);
                 ENQUEUE(sym);
                 break;
 
             case T_FUN:
+                if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
+                    SYNTAX_ERROR();
+
                 sym = make_symbol(OP, t, 0);
                 sym->op = match_fun(tmp);
                 PUSH(sym);
                 break;
 
             case T_OP:
+                if (last == T_FUN)
+                    SYNTAX_ERROR();
+
                 sym = make_symbol(OP, t, 0);
                 sym->op = match_operator(tmp[0], last);
+
+                /* exclude unary minus */
+                if (sym->op.binary && (last == T_OP || last == T_LPAREN))
+                    SYNTAX_ERROR();
+
 
                 if (sym->op.binary) {
                     while (sp > 0 && PEEK()->type == OP) {
@@ -197,11 +226,22 @@ parsed_expr parse (char * expr)
                 break;
 
             case T_LPAREN:
+                if (NUMERIC(last) || last == T_RPAREN)
+                    SYNTAX_ERROR();
+
                 sym = make_symbol(LPAREN, t, 0);
                 PUSH(sym);
                 break;
 
             case T_RPAREN:
+                if (last == T_OP || last == T_FUN)
+                    SYNTAX_ERROR();
+                if (last == T_RPAREN) {
+                    free(queue);
+                    free(tmp);
+                    return parse_error(t, "Empty expression"); \
+                }
+
                 while (sp > 0 && PEEK()->type != LPAREN)
                     ENQUEUE(POP());
 
