@@ -20,20 +20,21 @@ Operator match_operator(char c, int last)
     switch (c) {
         case '-':
             op.prec = 1;
-            if (last == T_LPAREN || last == T_OP)
+            if (last == T_LPAREN || last == T_OP) {
                 op.binary = 0;
+			}
             break;
         case '+':
-            op.prec = 2;
+            op.prec = 1;
             break;
         case '/':
-            op.prec = 3;
+            op.prec = 2;
             break;
         case '*':
-            op.prec = 4;
+            op.prec = 3;
             break;
         case '^':
-            op.prec = 5;
+            op.prec = 4;
             op.assoc = RIGHT;
             break;
     }
@@ -44,8 +45,8 @@ Operator match_operator(char c, int last)
 Operator match_fun(char * fun_str)
 {
     Operator op;
-    op.prec = 6;
-    op.assoc = LEFT;
+    op.prec = 5;
+    op.assoc = RIGHT;
     op.binary = 0;
 
     if (strcmp(fun_str, "sin") == 0)

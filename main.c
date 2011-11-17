@@ -22,19 +22,22 @@ int main(int argc, char ** argv)
                 case OP:
                     switch (s->op.prec) {
                         case 1:
-                            printf(" -");
+							if (s->op.binary)
+								printf(" +");
+							else 
+								printf(" _");
                             break;
                         case 2:
-                            printf(" +");
-                            break;
-                        case 3:
                             printf(" /");
                             break;
-                        case 4:
+                        case 3:
                             printf(" *");
                             break;
-                        case 5:
+                        case 4:
                             printf(" ^");
+                            break;
+                        case 5:
+                            printf(" fun");
                             break;
                     }
                     break;

@@ -111,6 +111,11 @@ parsed_expr check(int length, symbol ** queue)
 
 #undef ENQUEUE
 
+	if (sp != 1) {
+		free(queue);
+		free(output);
+		return parse_error(sym->tok, "Missing operator");
+	}
 
 
     free(queue);
@@ -236,10 +241,10 @@ parsed_expr parse (char * expr)
             case T_RPAREN:
                 if (last == T_OP || last == T_FUN)
                     SYNTAX_ERROR();
-                if (last == T_RPAREN) {
+                if (last == T_LPAREN) {
                     free(queue);
                     free(tmp);
-                    return parse_error(t, "Empty expression"); \
+                    return parse_error(t, "Empty subexpression"); \
                 }
 
                 while (sp > 0 && PEEK()->type != LPAREN)
