@@ -20,27 +20,8 @@ int main(int argc, char ** argv)
                     printf(" x");
                     break;
                 case OP:
-                    switch (s->op.prec) {
-                        case 1:
-							if (s->op.binary)
-								printf(" +");
-							else 
-								printf(" _");
-                            break;
-                        case 2:
-                            printf(" /");
-                            break;
-                        case 3:
-                            printf(" *");
-                            break;
-                        case 4:
-                            printf(" ^");
-                            break;
-                        case 5:
-                            printf(" fun");
-                            break;
-                    }
-                    break;
+					printf(" op");
+					break;
             }
         }
         printf("\n");

@@ -214,18 +214,16 @@ parsed_expr parse (char * expr)
                     SYNTAX_ERROR();
 
 
-                if (sym->op.binary) {
-                    while (sp > 0 && PEEK()->type == OP) {
-                        if (PEEK()->op.assoc == LEFT && 
-                                PEEK()->op.prec >= sym->op.prec)
-                            ENQUEUE(POP());
-                        else if (PEEK()->op.assoc == RIGHT && 
-                                PEEK()->op.prec > sym->op.prec)
-                            ENQUEUE(POP());
-                        else
-                            break;
-                    }
-                }
+				while (sp > 0 && PEEK()->type == OP) {
+					if (PEEK()->op.assoc == LEFT && 
+							PEEK()->op.prec >= sym->op.prec)
+						ENQUEUE(POP());
+					else if (PEEK()->op.assoc == RIGHT && 
+							PEEK()->op.prec > sym->op.prec)
+						ENQUEUE(POP());
+					else
+						break;
+				}
 
                 PUSH(sym);
                 break;
@@ -244,7 +242,7 @@ parsed_expr parse (char * expr)
                 if (last == T_LPAREN) {
                     free(queue);
                     free(tmp);
-                    return parse_error(t, "Empty subexpression"); \
+                    return parse_error(t, "Empty subexpression");
                 }
 
                 while (sp > 0 && PEEK()->type != LPAREN)
