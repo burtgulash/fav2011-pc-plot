@@ -20,8 +20,8 @@ int main(int argc, char ** argv)
                     printf(" x");
                     break;
                 case OP:
-					printf(" op");
-					break;
+                    printf(" op");
+                    break;
             }
         }
         printf("\n");

@@ -11,45 +11,45 @@ static sp;
 
 void stack_init(int size)
 {
-	stack = (double*) calloc(size, sizeof(double));
-	sp = 0;
+    stack = (double*) calloc(size, sizeof(double));
+    sp = 0;
 }
 
 double eval(parsed_expr p, double x)
 {
     int i;
     symbol *sym;
-	double a, b;
+    double a, b;
 
-	sp = 0;
-	for (i = 0; i < p.length; i++) {
-		sym = p.expr[i];
+    sp = 0;
+    for (i = 0; i < p.length; i++) {
+        sym = p.expr[i];
 
-		switch (sym->type) {
-			case OP:
-				a = POP();
-				if (sym->op.binary) {
-					b = POP();
-					PUSH((sym->op.eval)(a, b));
-				} else
-					PUSH((sym->op.eval)(a, 0));
-				break;
+        switch (sym->type) {
+            case OP:
+                a = POP();
+                if (sym->op.binary) {
+                    b = POP();
+                    PUSH((sym->op.eval)(a, b));
+                } else
+                    PUSH((sym->op.eval)(a, 0));
+                break;
 
-			case NUM:
-				PUSH(sym->number);
-				break;
+            case NUM:
+                PUSH(sym->number);
+                break;
 
-			case VAR:
-				PUSH(x);
-				break;
-		}
-	}
+            case VAR:
+                PUSH(x);
+                break;
+        }
+    }
 
-	return sp[0]->number;
+    return sp[0]->number;
 }
 
 void plot(char * expr)
 {
-	parsed_expr parsed = parse(expr);
-	stack_init(parsed.length);
+    parsed_expr parsed = parse(expr);
+    stack_init(parsed.length);
 }

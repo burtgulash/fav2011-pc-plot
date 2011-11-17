@@ -21,16 +21,16 @@ Operator match_operator(char c, int last)
         case '-':
             op.prec = 1;
             if (last == T_LPAREN || last == T_OP) {
-				op.prec   = 4;
-				op.assoc  = RIGHT;
+                op.prec   = 4;
+                op.assoc  = RIGHT;
                 op.binary = 0;
-			}
+            }
             break;
         case '+':
             op.prec = 1;
             break;
         case '/':
-		case '*':
+        case '*':
             op.prec = 2;
             break;
         case '^':

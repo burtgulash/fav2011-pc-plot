@@ -7,6 +7,7 @@
 
 
 static symbol ** stack;
+static int sp;
 
 #define PUSH(x) stack[sp++] = (x)
 #define POP()   stack[--sp]
@@ -64,11 +65,12 @@ parsed_expr check(int length, symbol ** queue)
 {
     parsed_expr result;
 
-    int i, qp = 0, sp = 0;
+    int i, qp = 0;
     symbol *sym, *tmp;
     symbol ** output = (symbol**) calloc(length, sizeof(symbol*));
 #define ENQUEUE(x) output[qp++] = (x)
 
+    sp = 0;
     for (i = 0; i < length; i++) {
         sym = queue[i];
         if (sym->type == OP) {
@@ -111,11 +113,11 @@ parsed_expr check(int length, symbol ** queue)
 
 #undef ENQUEUE
 
-	if (sp != 1) {
-		free(queue);
-		free(output);
-		return parse_error(sym->tok, "Missing operator");
-	}
+    if (sp != 1) {
+        free(queue);
+        free(output);
+        return parse_error(sym->tok, "Missing operator");
+    }
 
 
     free(queue);
@@ -146,6 +148,7 @@ parsed_expr parse (char * expr)
     /* eof token +1 */
     tokens  = (token**)  calloc(expr_len + 1, sizeof(token*));
 
+    sp = 0;
     do {
         t = next_tok(expr, i);
         tokens[num_tok++] = t;
@@ -214,16 +217,16 @@ parsed_expr parse (char * expr)
                     SYNTAX_ERROR();
 
 
-				while (sp > 0 && PEEK()->type == OP) {
-					if (PEEK()->op.assoc == LEFT && 
-							PEEK()->op.prec >= sym->op.prec)
-						ENQUEUE(POP());
-					else if (PEEK()->op.assoc == RIGHT && 
-							PEEK()->op.prec > sym->op.prec)
-						ENQUEUE(POP());
-					else
-						break;
-				}
+                while (sp > 0 && PEEK()->type == OP) {
+                    if (PEEK()->op.assoc == LEFT && 
+                            PEEK()->op.prec >= sym->op.prec)
+                        ENQUEUE(POP());
+                    else if (PEEK()->op.assoc == RIGHT && 
+                            PEEK()->op.prec > sym->op.prec)
+                        ENQUEUE(POP());
+                    else
+                        break;
+                }
 
                 PUSH(sym);
                 break;
