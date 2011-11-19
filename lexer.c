@@ -4,6 +4,8 @@
 #include "lexer.h"
 #include "func.h"
 
+#define isoctal(c) ('0' <= (c) && (c) < '8')
+
 extern char * functions[NUM_F];
 char * var_literal = "x";
 
@@ -18,17 +20,13 @@ static int isoperator(char c)
     return 0;
 }
 
-static int isoctal(char c)
-{
-    return '0' <= c && c < '8';
-}
-
-
+/* lexer states */
 enum {ZERO, DOT, FRAC, DEC, XX, EE, OCT, HEX, EXP, EXP_SIGN, 
       DEC_MATCHED, OCT_MATCHED, HEX_MATCHED, FLOAT_MATCHED};
 
 
-token * make_tok(int type, int pos, int len, char * context)
+/* construct a token */
+static token * make_tok(int type, int pos, int len, char * context)
 {
     token * tok = (token*) malloc(sizeof(token));
 

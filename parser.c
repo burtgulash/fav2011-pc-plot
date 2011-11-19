@@ -13,10 +13,13 @@ static int sp = 0;
 #define POP()   stack[--sp]
 #define PEEK()  stack[sp - 1]
 
+
 static token ** tokens;
 static symbol ** symbols;
 static int num_tok = 0;
 static int num_sym = 0;
+
+
 
 void parser_init(int size)
 {
@@ -25,6 +28,7 @@ void parser_init(int size)
     /* eof token +1 */
     tokens  = (token**)  calloc(size + 1, sizeof(token*));
 }
+
 
 void dispose(parsed_expr p)
 {
@@ -46,6 +50,7 @@ void dispose(parsed_expr p)
     symbols = NULL;
 }
 
+
 parsed_expr parse_error(token * tok, const char * error_msg)
 {
     parsed_expr error_expr = {0, NULL};
@@ -54,6 +59,7 @@ parsed_expr parse_error(token * tok, const char * error_msg)
 
     return error_expr;
 }
+
 
 symbol * make_symbol(int type, token * tok, double number)
 {
