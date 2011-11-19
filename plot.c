@@ -112,10 +112,15 @@ static void plot(FILE * out, parsed_expr p)
         y_1 = y_high;
 
     fprintf(out, "newpath\n");
-    fprintf(out, "%.3f %.3f moveto\n", coord_x(-y_1), coord_y(x_1));
+    fprintf(out, "%.3f %.3f moveto\n", coord_x(x_1), coord_y(y_1));
 
 #define INTERSECT(boundary) (x_1 + ((boundary) - y_1) * \
                             (x_2 - x_1) / (y_2 - y_1));
+
+#define LINETO(x, y) fprintf(out, "%.3f %.3f lineto\n", \
+                             coord_x((x)), coord_y((y))) 
+#define MOVETO(x, y) fprintf(out, "%.3f %.3f moveto\n", \
+                             coord_x((x)), coord_y((y))) 
 
     /* flip order of x and y and sign of y in Landscape mode */
     while (x_2 <= x_right) {
@@ -125,28 +130,23 @@ static void plot(FILE * out, parsed_expr p)
             if (last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
-                    fprintf(out, "%.3f %.3f moveto\n", 
-                             coord_x(-y_low), coord_y(x_intersect));
+					MOVETO(x_intersect, y_low);
                 } else {
                     x_intersect = INTERSECT(y_high);
-                    fprintf(out, "%.3f %.3f moveto\n", 
-                             coord_x(-y_high), coord_y(x_intersect));
+					MOVETO(x_intersect, y_high);
                 }
             }
-            fprintf(out, "%.3f %.3f lineto\n", 
-                         coord_x(-y_2), coord_y(x_2));
+			LINETO(x_2, y_2);
 
             last_out = 0;
         } else {
             if (!last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_high);
-                    fprintf(out, "%.3f %.3f lineto\n", 
-                             coord_x(-y_high), coord_y(x_intersect));
+					LINETO(x_intersect, y_high);
                 } else {
                     x_intersect = INTERSECT(y_low);
-                    fprintf(out, "%.3f %.3f lineto\n", 
-                             coord_x(-y_low), coord_y(x_intersect));
+					LINETO(x_intersect, y_low);
                 }
             }
 
@@ -173,7 +173,7 @@ static void write_header(FILE * out, char * expression)
     fprintf(out, "%%%%Title: Plot %s\n", expression);
     fprintf(out, "%%%%Creator: Plot utility\n");
     fprintf(out, "%%%%Pages: 1\n");
-    fprintf(out, "%%%%Orientation: Landscape\n");
+    /* fprintf(out, "%%%%Orientation: Landscape\n"); */
     fprintf(out, "%%%%BoundingBox: %d %d %d %d\n", LLX, LLY, URX, URY);
     fprintf(out, "%%%%EndComments\n\n");
     fprintf(out, "%%%%Page: 1 1\n");
