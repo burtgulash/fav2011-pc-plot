@@ -164,5 +164,6 @@ void write_ps(FILE * out, char * expression)
     plot(out, parsed);
     write_footer(out);
 
+	free(stack);
     dispose(parsed);
 }
