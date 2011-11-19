@@ -51,6 +51,8 @@ token * next_tok(char * expr, int i)
         return make_tok(T_LPAREN, i, 1, expr);
     } else if (c == ')') {
         return make_tok(T_RPAREN, i, 1, expr);
+	} else if (c == ':') {
+		return make_tok(T_COLON, i, 1, expr);
     } else if (isoperator(c)) {
         return make_tok(T_OP, i, 1, expr);
     } else if (isspace(c)) { 

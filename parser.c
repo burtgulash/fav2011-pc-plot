@@ -264,6 +264,7 @@ parsed_expr parse (char * expr)
                 sym = POP();
                 break;
 
+            case T_COLON:
             case T_ERROR:
                 free(queue);
                 free(tmp);

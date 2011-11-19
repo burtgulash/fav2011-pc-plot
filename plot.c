@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "parser.h"
+#include "plot.h"
 
 #define PLOT_COLOR "0 0.4 0.9"
 
@@ -59,7 +60,7 @@ static double x_left = -10;
 static double x_right = 10;
 static double y_low = -10;
 static double y_high = 10;
-static double smoothness = 500;
+static double smoothness = 300;
 
 static double scale_x;
 static double scale_y;
@@ -75,13 +76,21 @@ static double coord_y(double y)
 }
 
 
-void plot_init(int size)
+int plot_init(int size, Limits * lims)
 {
+    if (lims) {
+        x_left  = lims->x_low;
+        x_right = lims->x_high;
+        y_low   = lims->y_low;
+        y_high  = lims->y_high;
+    }
+
     stack = (double*) calloc(size, sizeof(double));
     sp = 0;
 
     scale_x = (URX - LLX - 2*BLANK) / (x_right - x_left);
     scale_y = (URY - LLY - 2*BLANK) / (y_high - y_low);
+    return 1;
 }
 
 
@@ -97,18 +106,18 @@ static void plot(FILE * out, parsed_expr p)
     double x_intersect;
     int last_out = 0;
 
-    /* flip order of x and y and sign of y in Landscape mode */
     if (y_1 < y_low)
         y_1 = y_low;
     else if (y_1 > y_high)
         y_1 = y_high;
 
     fprintf(out, "newpath\n");
-    fprintf(out, "%.4f %.4f moveto\n", coord_x(-y_1), coord_y(x_1));
+    fprintf(out, "%.3f %.3f moveto\n", coord_x(-y_1), coord_y(x_1));
 
 #define INTERSECT(boundary) (x_1 + ((boundary) - y_1) * \
                             (x_2 - x_1) / (y_2 - y_1));
 
+    /* flip order of x and y and sign of y in Landscape mode */
     while (x_2 <= x_right) {
         y_2 = eval(p, x_2);
 
@@ -116,15 +125,15 @@ static void plot(FILE * out, parsed_expr p)
             if (last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
-                    fprintf(out, "%.4f %.4f moveto\n", 
+                    fprintf(out, "%.3f %.3f moveto\n", 
                              coord_x(-y_low), coord_y(x_intersect));
                 } else {
                     x_intersect = INTERSECT(y_high);
-                    fprintf(out, "%.4f %.4f moveto\n", 
+                    fprintf(out, "%.3f %.3f moveto\n", 
                              coord_x(-y_high), coord_y(x_intersect));
                 }
             }
-            fprintf(out, "%.4f %.4f lineto\n", 
+            fprintf(out, "%.3f %.3f lineto\n", 
                          coord_x(-y_2), coord_y(x_2));
 
             last_out = 0;
@@ -132,11 +141,11 @@ static void plot(FILE * out, parsed_expr p)
             if (!last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_high);
-                    fprintf(out, "%.4f %.4f lineto\n", 
+                    fprintf(out, "%.3f %.3f lineto\n", 
                              coord_x(-y_high), coord_y(x_intersect));
                 } else {
                     x_intersect = INTERSECT(y_low);
-                    fprintf(out, "%.4f %.4f lineto\n", 
+                    fprintf(out, "%.3f %.3f lineto\n", 
                              coord_x(-y_low), coord_y(x_intersect));
                 }
             }
@@ -153,7 +162,6 @@ static void plot(FILE * out, parsed_expr p)
     fprintf(out, "%s setrgbcolor\n", PLOT_COLOR);
     fprintf(out, "0.5 setlinewidth\n");
     fprintf(out, "stroke\n");
-    fprintf(out, "%%%%PageTrailer\n\n");
 }
 
 
@@ -186,23 +194,20 @@ static void write_box(FILE * out)
 
 static void write_footer(FILE * out)
 {
+    fprintf(out, "%%%%PageTrailer\n");
     fprintf(out, "%%%%Trailer\n");
     fprintf(out, "%%%%EOF\n\n");
 }
 
 
-void write_ps(FILE * out, char * expression, char * limits)
+void write_ps(FILE * out, parsed_expr parsed, char * expr, Limits * lim)
 {
-    parsed_expr parsed = parse(expression);
-    if (parsed.expr != NULL) {
-        plot_init(parsed.length);
+    plot_init(parsed.length, lim);
 
-        write_header(out, expression);
-        plot(out, parsed);
-        write_box(out);
-        write_footer(out);
+    write_header(out, expr);
+    plot(out, parsed);
+    write_box(out);
+    write_footer(out);
 
-        free(stack);
-    }
-    dispose(parsed);
+    free(stack);
 }

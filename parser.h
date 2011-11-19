@@ -23,6 +23,7 @@ typedef struct {
 
 
 parsed_expr parse (char * expr);
+parsed_expr parse_error(token * tok, const char * error_msg);
 void dispose(parsed_expr p);
 
 #endif
