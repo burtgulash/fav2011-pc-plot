@@ -98,10 +98,10 @@ static void plot(FILE * out, parsed_expr p)
     int last_out = 0;
 
     /* flip order of x and y and sign of y in Landscape mode */
-	if (y_1 < y_low)
-		y_1 = y_low;
-	else if (y_1 > y_high)
-		y_1 = y_high;
+    if (y_1 < y_low)
+        y_1 = y_low;
+    else if (y_1 > y_high)
+        y_1 = y_high;
 
     fprintf(out, "newpath\n");
     fprintf(out, "%.4f %.4f moveto\n", coord_x(-y_1), coord_y(x_1));
@@ -194,16 +194,15 @@ static void write_footer(FILE * out)
 void write_ps(FILE * out, char * expression, char * limits)
 {
     parsed_expr parsed = parse(expression);
-    if (parsed.expr == NULL)
-        return;
+    if (parsed.expr != NULL) {
+        plot_init(parsed.length);
 
-    plot_init(parsed.length);
+        write_header(out, expression);
+        plot(out, parsed);
+        write_box(out);
+        write_footer(out);
 
-    write_header(out, expression);
-    plot(out, parsed);
-    write_box(out);
-    write_footer(out);
-
-    free(stack);
+        free(stack);
+    }
     dispose(parsed);
 }
