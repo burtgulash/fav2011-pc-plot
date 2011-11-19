@@ -20,13 +20,6 @@ static int sp = 0;
 #define PEEK()  stack[sp - 1]
 
 
-
-void stack_init(int size)
-{
-    stack = (double*) calloc(size, sizeof(double));
-    sp = 0;
-}
-
 double eval(parsed_expr p, double x)
 {
     int i;
@@ -68,46 +61,88 @@ static double y_low = -10;
 static double y_high = 10;
 static double smoothness = 500;
 
+static double scale_x;
+static double scale_y;
+
 static double coord_x(double x)
 {
-    double scale_x = (URX - LLX) / (x_right - x_left);
-    return (x - x_left) * scale_x + LLX;
+    return (x - x_left) * scale_x + LLX + BLANK;
 }
 
 static double coord_y(double y)
 {
-    double scale_y = (URY - LLY) / (y_high - y_low);
-    return (y - y_low) * scale_y + LLY;
+    return (y - y_low) * scale_y + LLY + BLANK;
 }
+
+
+void plot_init(int size)
+{
+    stack = (double*) calloc(size, sizeof(double));
+    sp = 0;
+
+    scale_x = (URX - LLX - 2*BLANK) / (x_right - x_left);
+    scale_y = (URY - LLY - 2*BLANK) / (y_high - y_low);
+}
+
+
 
 static void plot(FILE * out, parsed_expr p)
 {
     double delta = (x_right - x_left) / smoothness;
     double x_1 = x_left;
     double x_2 = x_left + delta;
-    double y_1, y_2;
+    double y_1 = eval(p, x_1);
+    double y_2;
+    /* if y-value out of box, compute intersection of line with box */
+    double x_intersect;
     int last_out = 0;
 
-    stack_init(p.length);
-    y_1 = eval(p, x_1);
+    /* flip order of x and y and sign of y in Landscape mode */
+	if (y_1 < y_low)
+		y_1 = y_low;
+	else if (y_1 > y_high)
+		y_1 = y_high;
 
     fprintf(out, "newpath\n");
-    fprintf(out, "%.2f %.2f moveto\n", x_1, y_1);
+    fprintf(out, "%.4f %.4f moveto\n", coord_x(-y_1), coord_y(x_1));
+
+#define INTERSECT(boundary) (x_1 + ((boundary) - y_1) * \
+                            (x_2 - x_1) / (y_2 - y_1));
 
     while (x_2 <= x_right) {
         y_2 = eval(p, x_2);
 
         if (y_low <= y_2 && y_2 <= y_high) {
-            if (last_out)
-                fprintf(out, "%.2f %.2f moveto\n", 
-                         coord_x(x_2), coord_y(y_2));
-            else
-                fprintf(out, "%.2f %.2f lineto\n", 
-                         coord_x(x_2), coord_y(y_2));
+            if (last_out) {
+                if (y_2 > y_1) {
+                    x_intersect = INTERSECT(y_low);
+                    fprintf(out, "%.4f %.4f moveto\n", 
+                             coord_x(-y_low), coord_y(x_intersect));
+                } else {
+                    x_intersect = INTERSECT(y_high);
+                    fprintf(out, "%.4f %.4f moveto\n", 
+                             coord_x(-y_high), coord_y(x_intersect));
+                }
+            }
+            fprintf(out, "%.4f %.4f lineto\n", 
+                         coord_x(-y_2), coord_y(x_2));
 
             last_out = 0;
-        } else 
+        } else {
+            if (!last_out) {
+                if (y_2 > y_1) {
+                    x_intersect = INTERSECT(y_high);
+                    fprintf(out, "%.4f %.4f lineto\n", 
+                             coord_x(-y_high), coord_y(x_intersect));
+                } else {
+                    x_intersect = INTERSECT(y_low);
+                    fprintf(out, "%.4f %.4f lineto\n", 
+                             coord_x(-y_low), coord_y(x_intersect));
+                }
+            }
+
             last_out = 1;
+        }
 
 
         x_1 = x_2;
@@ -116,6 +151,7 @@ static void plot(FILE * out, parsed_expr p)
     }
 
     fprintf(out, "%s setrgbcolor\n", PLOT_COLOR);
+    fprintf(out, "0.5 setlinewidth\n");
     fprintf(out, "stroke\n");
     fprintf(out, "%%%%PageTrailer\n\n");
 }
@@ -143,6 +179,8 @@ static void write_box(FILE * out)
     fprintf(out, "%d %d lineto\n", URX - BLANK, URY - BLANK);
     fprintf(out, "%d %d lineto\n", LLX + BLANK, URY - BLANK);
     fprintf(out, "closepath\n");
+    fprintf(out, "0 setgray\n");
+    fprintf(out, "1 setlinewidth\n");
     fprintf(out, "stroke\n");
 }
 
@@ -153,17 +191,19 @@ static void write_footer(FILE * out)
 }
 
 
-void write_ps(FILE * out, char * expression)
+void write_ps(FILE * out, char * expression, char * limits)
 {
     parsed_expr parsed = parse(expression);
     if (parsed.expr == NULL)
         return;
 
+    plot_init(parsed.length);
+
     write_header(out, expression);
-    write_box(out);
     plot(out, parsed);
+    write_box(out);
     write_footer(out);
 
-	free(stack);
+    free(stack);
     dispose(parsed);
 }
