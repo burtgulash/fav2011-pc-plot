@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -pedantic -ansi
-EXEC = parse
-SRCS = main.c lexer.c parser.c func.c
+EXEC = plot
+SRCS = main.c lexer.c parser.c func.c plot.c
 OBJS = $(SRCS:.c=.o)
 
 $(EXEC): $(OBJS)
