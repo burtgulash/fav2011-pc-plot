@@ -6,7 +6,7 @@
 int main(int argc, char ** argv)
 {
     if (argc == 2) {
-		write_ps(stdout, argv[1]);
+        write_ps(stdout, argv[1]);
     }
 
     return 0;

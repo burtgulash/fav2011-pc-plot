@@ -5,7 +5,7 @@
 #include "func.h"
 
 char * functions[NUM_F] = {"abs", "exp", "ln", "log",
-						   "sin", "cos", "tan", 
+                           "sin", "cos", "tan", 
                            "asin", "acos", "atan",
                            "sinh", "cosh", "tanh"};
 
@@ -41,7 +41,7 @@ Operator match_operator(char c, int last)
     Operator op;
     op.assoc  = LEFT;
     op.binary = 1;
-	op.eval   = NULL;
+    op.eval   = NULL;
 
     switch (c) {
         case '-':
@@ -49,32 +49,32 @@ Operator match_operator(char c, int last)
                 op.prec   = 4;
                 op.assoc  = RIGHT;
                 op.binary = 0;
-				op.eval   = neg;
+                op.eval   = neg;
             } else {
-				op.prec = 1;
-				op.eval = sub;
-			}
+                op.prec = 1;
+                op.eval = sub;
+            }
             break;
         case '+':
-			op.eval  = add;
+            op.eval  = add;
             op.prec  = 1;
             break;
         case '/':
-			op.prec  = 2;
-			op.eval  = div;
-			break;
+            op.prec  = 2;
+            op.eval  = div;
+            break;
         case '*':
             op.prec  = 2;
-			op.eval  = mul;
+            op.eval  = mul;
             break;
         case '^':
             op.prec  = 3;
             op.assoc = RIGHT;
-			op.eval  = Pow;
+            op.eval  = Pow;
             break;
     }
 
-	assert (op.eval);
+    assert (op.eval);
 
     return op;
 }
@@ -85,12 +85,12 @@ Operator match_fun(char * fun_str)
     op.prec   = 5;
     op.assoc  = RIGHT;
     op.binary = 0;
-	op.eval   = NULL;
+    op.eval   = NULL;
 
-	if (strcmp(fun_str, "abs") == 0)
-		op.eval = Abs;
-	else if (strcmp(fun_str, "exp")  == 0)
-		op.eval = Exp;
+    if (strcmp(fun_str, "abs") == 0)
+        op.eval = Abs;
+    else if (strcmp(fun_str, "exp")  == 0)
+        op.eval = Exp;
     else if (strcmp(fun_str, "ln")   == 0)
         op.eval = Ln;
     else if (strcmp(fun_str, "log")  == 0)
@@ -114,7 +114,7 @@ Operator match_fun(char * fun_str)
     else if (strcmp(fun_str, "tanh") == 0)
         op.eval = Tanh;
 
-	assert(op.eval);
+    assert(op.eval);
 
     return op;
 }
