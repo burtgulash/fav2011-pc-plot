@@ -7,7 +7,7 @@
 
 
 static symbol ** stack;
-static int sp;
+static int sp = 0;
 
 #define PUSH(x) stack[sp++] = (x)
 #define POP()   stack[--sp]
@@ -18,7 +18,15 @@ static symbol ** symbols;
 static int num_tok = 0;
 static int num_sym = 0;
 
-void delete(parsed_expr p)
+void parser_init(int size)
+{
+    stack   = (symbol**) calloc(size, sizeof(symbol*));
+    symbols = (symbol**) calloc(size, sizeof(symbol*));
+    /* eof token +1 */
+    tokens  = (token**)  calloc(size + 1, sizeof(token*));
+}
+
+void dispose(parsed_expr p)
 {
     int i;
     for (i = 0; i < num_tok; i++)
@@ -70,37 +78,31 @@ parsed_expr check(int length, symbol ** queue)
     symbol ** output = (symbol**) calloc(length, sizeof(symbol*));
 #define ENQUEUE(x) output[qp++] = (x)
 
+#define EVAL_ERROR(msg) { \
+                    free(queue); \
+                    free(output); \
+                    return parse_error(sym->tok, msg); \
+                        }
+
     sp = 0;
     for (i = 0; i < length; i++) {
         sym = queue[i];
         if (sym->type == OP) {
-            if (sp <= 0) {
-                free(queue);
-                free(output);
-                return parse_error(sym->tok, "Missing first operand"); 
-            }
+            if (sp <= 0)
+                EVAL_ERROR("Missing first operand");
 
             tmp = POP();
-            if (tmp->type != NUM && tmp->type != VAR) {
-                free(queue);
-                free(output);
-                return parse_error(sym->tok, "Number or variable expected"); 
-            }
+            if (tmp->type != NUM && tmp->type != VAR)
+                EVAL_ERROR("Number or variable expected");
 
 
             if (sym->op.binary) {
-                if (sp <= 0) {
-                    free(queue);
-                    free(output);
-                    return parse_error(sym->tok, "Missing second operand"); 
-                }
+                if (sp <= 0)
+                    EVAL_ERROR("Missing second operand"); 
 
                 tmp = POP();
-                if (tmp->type != NUM && tmp->type != VAR) {
-                    free(queue);
-                    free(output);
-                    return parse_error(sym->tok, "Number or variable expected");
-                }
+                if (tmp->type != NUM && tmp->type != VAR)
+                    EVAL_ERROR("Number or variable expected");
             }
 
             PUSH(tmp);
@@ -119,7 +121,6 @@ parsed_expr check(int length, symbol ** queue)
         return parse_error(sym->tok, "Missing operator");
     }
 
-
     free(queue);
 
     result.length = length;
@@ -131,24 +132,21 @@ parsed_expr check(int length, symbol ** queue)
 parsed_expr parse (char * expr)
 {
     int expr_len = strlen(expr);
+    int qp = 0;
+    /* init queue */
     symbol ** queue = (symbol**) calloc(expr_len, sizeof(symbol*));
 #define ENQUEUE(x) queue[qp++] = (x)
 
-    int qp = 0, sp = 0;
     int i = 0, eof = 0, last = T_LPAREN;
-
-    token * t;
-
     double number;
     char *tmp;
     symbol *sym;
+    token * t;
 
-    stack   = (symbol**) calloc(expr_len, sizeof(symbol*));
-    symbols = (symbol**) calloc(expr_len, sizeof(symbol*));
-    /* eof token +1 */
-    tokens  = (token**)  calloc(expr_len + 1, sizeof(token*));
 
-    sp = 0;
+    /* init stack and trash */
+    parser_init(expr_len);
+
     do {
         t = next_tok(expr, i);
         tokens[num_tok++] = t;

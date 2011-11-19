@@ -23,6 +23,6 @@ typedef struct {
 
 
 parsed_expr parse (char * expr);
-void delete(parsed_expr p);
+void dispose(parsed_expr p);
 
 #endif

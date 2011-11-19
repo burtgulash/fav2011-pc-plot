@@ -26,7 +26,7 @@ int main(int argc, char ** argv)
         }
         printf("\n");
 
-        delete(parsed);
+        dispose(parsed);
     }
 
     return 0;
