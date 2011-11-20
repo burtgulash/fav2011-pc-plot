@@ -87,24 +87,34 @@ int parse_limits(Limits * limits, char * lim_string)
 int main(int argc, char ** argv)
 {
     parsed_expr parsed;
+    FILE * plot_file;
     Limits * lims;
     int exit_code = EXIT_SUCCESS;
 
-    if (argc == 2 || argc == 3) {
+    if (argc == 3 || argc == 4) {
         parsed = parse(argv[1]);
         if (parsed.expr != NULL) {
-            if (argc == 2)
-                write_ps(stdout, parsed, argv[1], NULL);
-            else if (argc == 3) {
-                lims = (Limits*) malloc(sizeof(Limits));            
-                if(parse_limits(lims, argv[2]))
-                    write_ps(stdout, parsed, argv[1], lims);
-                else
-                    exit_code = EXIT_FAILURE;
-                free(lims);
+            plot_file = fopen(argv[2], "w");
+            if (plot_file != NULL) {
+                if (argc == 3)
+                    write_ps(plot_file, parsed, argv[1], NULL);
+                else {
+                    lims = (Limits*) malloc(sizeof(Limits));            
+                    if(parse_limits(lims, argv[3]))
+                        write_ps(plot_file, parsed, argv[1], lims);
+                    else
+                        exit_code = EXIT_FAILURE;
+                    free(lims);
+                }
+
+                fclose(plot_file);
+            } else {
+                perror("Error opening file");
+                exit_code = EXIT_FAILURE;
             }
         } else
             exit_code = EXIT_FAILURE;
+
         dispose(parsed);
     } else
         exit_code = EXIT_FAILURE;
