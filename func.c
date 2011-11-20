@@ -1,8 +1,11 @@
 #include <assert.h>
 #include <math.h>
+#include <float.h>
 #include <string.h>
 #include "lexer.h"
 #include "func.h"
+
+#define IS_NAN(x) ((x) != (x))
 
 char * functions[NUM_F] = {"abs", "exp", "ln", "log",
                            "sin", "cos", "tan", 
@@ -13,9 +16,7 @@ double add(double a, double b) { return a + b; }
 double neg(double a, double b) { return -a; }
 double sub(double a, double b) { return a - b; }
 double mul(double a, double b) { return a * b; }
-/* TODO divide by zero check */
 double div(double a, double b) { return a / b; }
-/* TODO errno check */
 double Pow(double a, double b) { return pow(a, b); }
 
 double Abs(double a, double b) { return fabs(a); }

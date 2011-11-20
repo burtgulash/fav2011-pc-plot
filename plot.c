@@ -110,7 +110,7 @@ static void plot(FILE * out, parsed_expr p)
     double old_y;
     /* if y-value out of box, compute intersection of line with box */
     double x_intersect;
-    int last_out = 0, last_nan = 0;
+    int last_out = 1, last_nan = 0;
     int SMOOTHNESS_LVL = MAX_SMOOTHNESS_LVL;
 
 
@@ -132,10 +132,14 @@ static void plot(FILE * out, parsed_expr p)
         y_1 = y_low;
     else if (y_1 > y_high)
         y_1 = y_high;
+	else
+		last_out = 0;
 
     fprintf(out, "newpath\n");
     if (!IS_NAN(y_1))
         MOVETO(x_1, y_1);
+	else
+		last_nan = 1;
 
 
     old_x = x_1;
@@ -153,12 +157,14 @@ static void plot(FILE * out, parsed_expr p)
             } else if (last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
-                    if (!IS_NAN(x_intersect))
-                        MOVETO(x_intersect, y_low);
+					if (IS_NAN(x_intersect))
+						x_intersect = x_1;
+					MOVETO(x_intersect, y_low);
                 } else {
                     x_intersect = INTERSECT(y_high);
-                    if (!IS_NAN(x_intersect))
-                        MOVETO(x_intersect, y_high);
+                    if (IS_NAN(x_intersect))
+						x_intersect = x_1;
+					MOVETO(x_intersect, y_high);
                 }
             }
             LINETO(x_2, y_2);
@@ -168,12 +174,14 @@ static void plot(FILE * out, parsed_expr p)
             if (!last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_high);
-                    if (!IS_NAN(x_intersect))
-                        LINETO(x_intersect, y_high);
+                    if (IS_NAN(x_intersect))
+						x_intersect = x_1;
+					LINETO(x_intersect, y_high);
                 } else {
                     x_intersect = INTERSECT(y_low);
-                    if (!IS_NAN(x_intersect))
-                        LINETO(x_intersect, y_low);
+                    if (IS_NAN(x_intersect))
+						x_intersect = x_1;
+					LINETO(x_intersect, y_low);
                 }
             }
 
@@ -324,7 +332,7 @@ static void write_box(FILE * out)
     fprintf(out, "stroke\n\n");
 
     fprintf(out, "/Helvetica findfont\n");
-    fprintf(out, "11 scalefont setfont\n");
+    fprintf(out, "12 scalefont setfont\n");
 
     write_axis_units(out, 0);
     write_axis_units(out, 1);
