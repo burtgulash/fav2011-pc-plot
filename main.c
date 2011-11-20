@@ -61,6 +61,12 @@ Limits * parse_limits(char * lim_string)
         free(tok);
     }
 
+    if (limits->x_low >= limits->x_high || limits->y_low >= limits->y_high) {
+        fprintf(stderr, "Low limit must be less than high limit\n");
+        free(limits);
+        return NULL;
+    }
+
     return limits;
 }
 

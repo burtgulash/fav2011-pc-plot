@@ -4,11 +4,17 @@
 #include "parser.h"
 #include "plot.h"
 
+/** SMOOTHING PARAMETERS **/
 #define PLOT_COLOR "0 0.4 0.9"
-#define MAX_SMOOTHNESS_LVL 8
-#define LIM 1.0
+/* higher -> more postscript lines, but smoother */
+#define SMOOTHNESS 3000 
+/* higher -> less postscript lines, but slower and occasionally will fail
+   on smooth-then-dense plots (eg. sin(1/x^60) from -10 to 10) */
+#define MAX_SMOOTHNESS_LVL 4
+#define LIM .002
 
 
+/** BOX PARAMETERS **/
 /* bounding box LOWER-LEFT and UPPER-RIGHT corners */
 #define LLX 18
 #define LLY 18
@@ -17,6 +23,8 @@
 
 #define BLANK 50
 
+
+/** STACK for evaluating parsed expression **/
 static double * stack;
 static int sp = 0;
 
@@ -25,10 +33,20 @@ static int sp = 0;
 #define PEEK()  stack[sp - 1]
 
 
+/** PLOT x and y LIMITS **/
+static double x_left = -10;
+static double x_right = 10;
+static double y_low = -10;
+static double y_high = 10;
+
+static double scale_x;
+static double scale_y;
+
+
 #define IS_NAN(x) (x != x)
 
 
-double eval(parsed_expr p, double x)
+double evaluate(parsed_expr p, double x)
 {
     int i;
     symbol *sym;
@@ -62,27 +80,6 @@ double eval(parsed_expr p, double x)
 }
 
 
-
-static double x_left = -10;
-static double x_right = 10;
-static double y_low = -10;
-static double y_high = 10;
-static double smoothness = 10;
-
-static double scale_x;
-static double scale_y;
-
-static double coord_x(double x)
-{
-    return (x - x_left) * scale_x + LLX + BLANK;
-}
-
-static double coord_y(double y)
-{
-    return (y - y_low) * scale_y + LLY + BLANK;
-}
-
-
 int plot_init(int size, Limits * lims)
 {
     if (lims) {
@@ -104,105 +101,116 @@ int plot_init(int size, Limits * lims)
 
 static void plot(FILE * out, parsed_expr p)
 {
-    double delta = (x_right - x_left) / smoothness / smoothness;
+    double delta = (x_right - x_left) / SMOOTHNESS;
     double x_1 = x_left;
     double x_2 = x_left + delta;
-    double y_1 = eval(p, x_1);
-    double y_2 = eval(p, x_2);
-	double old_x;
-	double old_y;
+    double y_1 = evaluate(p, x_1);
+    double y_2 = evaluate(p, x_2);
+    double old_x;
+    double old_y;
     /* if y-value out of box, compute intersection of line with box */
     double x_intersect;
     int last_out = 0;
-	int smoothness_lvl = MAX_SMOOTHNESS_LVL / 2;
+    int SMOOTHNESS_LVL = MAX_SMOOTHNESS_LVL;
 
     if (y_1 < y_low)
         y_1 = y_low;
     else if (y_1 > y_high)
         y_1 = y_high;
 
+
+
+/** real coordinates to postscript plot coordinates transformation **/
+#define COORD_X(x) (((x) - x_left) * scale_x + LLX + BLANK)
+#define COORD_Y(y) (((y) - y_low) * scale_y + LLY + BLANK)
+
+#define LINETO(x, y) fprintf(out, "%.3f %.3f lineto\n", \
+                             COORD_X(x), COORD_Y(y)) 
+#define MOVETO(x, y) fprintf(out, "%.3f %.3f moveto\n", \
+                             COORD_X(x), COORD_Y(y)) 
+
+/* find intersection with y-boundary */
 #define INTERSECT(boundary) (x_1 + ((boundary) - y_1) * \
                             (x_2 - x_1) / (y_2 - y_1));
 
-#define LINETO(x, y) fprintf(out, "%.3f %.3f lineto\n", \
-                             coord_x(x), coord_y(y)) 
-#define MOVETO(x, y) fprintf(out, "%.3f %.3f moveto\n", \
-                             coord_x(x), coord_y(y)) 
-
     fprintf(out, "newpath\n");
-	MOVETO(x_1, y_1);
+    MOVETO(x_1, y_1);
 
 
-	old_x = x_1;
-	old_y = y_1;
+    old_x = x_1;
+    old_y = y_1;
 
-	/* plotting loop */
-	/* x_intersect produces nans for functinos like sin(x^100) */
+    /* plotting loop */
+    /* x_intersect produces nans for functinos like sin(x^100) */
     while (x_2 <= x_right) {
 
         if (y_low <= y_2 && y_2 <= y_high) {
             if (last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
-					if (!IS_NAN(x_intersect))
-						MOVETO(x_intersect, y_low);
+                    if (!IS_NAN(x_intersect))
+                        MOVETO(x_intersect, y_low);
                 } else {
-					x_intersect = INTERSECT(y_high);
-					if (!IS_NAN(x_intersect))
-						MOVETO(x_intersect, y_high);
+                    x_intersect = INTERSECT(y_high);
+                    if (!IS_NAN(x_intersect))
+                        MOVETO(x_intersect, y_high);
                 }
             }
-			LINETO(x_2, y_2);
+            LINETO(x_2, y_2);
 
             last_out = 0;
         } else {
             if (!last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_high);
-					if (!IS_NAN(x_intersect))
-						LINETO(x_intersect, y_high);
+                    if (!IS_NAN(x_intersect))
+                        LINETO(x_intersect, y_high);
                 } else {
                     x_intersect = INTERSECT(y_low);
-					if (!IS_NAN(x_intersect))
-						LINETO(x_intersect, y_low);
+                    if (!IS_NAN(x_intersect))
+                        LINETO(x_intersect, y_low);
                 }
             }
 
             last_out = 1;
         }
 
+/** smoothing procedure **/
 /* SLOPE_JUMP <- second derivative */
 #define SLOPE_JUMP (y_2 - y_1 - ((y_1 - old_y)*(x_2 - x_1))/(x_1 - old_x))
 #define TOO_SHARP() (fabs(SLOPE_JUMP) > LIM)
 #define TOO_SMOOTH() (fabs(SLOPE_JUMP) < LIM / 4)
 
-		old_x = x_1;
-		old_y = y_1;
+        old_x = x_1;
+        old_y = y_1;
         x_1 = x_2;
-		y_1 = y_2;
-		x_2 = x_1 + delta;
-		y_2 = eval(p, x_2);
-		while (smoothness_lvl < MAX_SMOOTHNESS_LVL && TOO_SHARP()) {
-			delta /= 2;
-			x_2 = x_1 + delta;
-			y_2 = eval(p, x_2);
-			smoothness_lvl ++;
-		}
+        y_1 = y_2;
+        x_2 = x_1 + delta;
+        y_2 = evaluate(p, x_2);
+        if (TOO_SHARP()) {
+            while (SMOOTHNESS_LVL < MAX_SMOOTHNESS_LVL && TOO_SHARP()) {
+                delta /= 2;
+                x_2 = x_1 + delta;
+                y_2 = evaluate(p, x_2);
+                SMOOTHNESS_LVL ++;
+            }
+        } else {
+            while (SMOOTHNESS_LVL > 0 && TOO_SMOOTH()) {
+                delta *= 2;
+                x_2 = x_1 + delta;
+                y_2 = evaluate(p, x_2);
+                SMOOTHNESS_LVL --;
+            }
+        }
 
-		while (smoothness_lvl > 0 && TOO_SMOOTH()) {
-			delta *= 2;
-			x_2 = x_1 + delta;
-			y_2 = eval(p, x_2);
-			smoothness_lvl --;
-		}
-
-		/* make sure the last point is on right boundary */
-		if (x_1 < x_right && x_1 + delta > x_right) {
-			x_2 = x_right;
-			y_2 = eval(p, x_2);
-		}
+        /* make sure the last point is on the right boundary */
+        if (x_1 < x_right && x_1 + delta > x_right) {
+            x_2 = x_right;
+            y_2 = evaluate(p, x_2);
+        }
     }
 
+    /* stroke the path */
     fprintf(out, "%s setrgbcolor\n", PLOT_COLOR);
     fprintf(out, "0.5 setlinewidth\n");
     fprintf(out, "stroke\n");
