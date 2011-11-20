@@ -1,4 +1,4 @@
-file="kokot.ps"
+file="test.eps"
 
 make
 
@@ -6,4 +6,4 @@ make
 evince "$file"
 
 make clean
-rm "$file"
+# rm "$file"

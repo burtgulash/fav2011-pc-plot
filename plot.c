@@ -224,7 +224,7 @@ static void plot(FILE * out, parsed_expr p)
 
 static void write_header(FILE * out, char * expression)
 {
-    fprintf(out, "%%!PS-Adobe-3.0\n");
+    fprintf(out, "%%!PS-Adobe-3.0 EPSF-3.0\n");
     fprintf(out, "%%%%DocumentMedia: Letter %d %d 0 () ()\n", 
                                                   LLX + URX, LLY + URY);
     fprintf(out, "%%%%Title: Plot %s\n", expression);
@@ -233,7 +233,6 @@ static void write_header(FILE * out, char * expression)
     /* fprintf(out, "%%%%Orientation: Landscape\n"); */
     fprintf(out, "%%%%BoundingBox: %d %d %d %d\n", LLX, LLY, URX, URY);
     fprintf(out, "%%%%EndComments\n\n");
-    fprintf(out, "%%%%Page: 1 1\n");
 }
 
 
@@ -325,8 +324,7 @@ static void write_box(FILE * out)
     fprintf(out, "stroke\n\n");
 
     fprintf(out, "/Helvetica findfont\n");
-    fprintf(out, "11 scalefont\n");
-    fprintf(out, "setfont\n");
+    fprintf(out, "11 scalefont setfont\n");
 
     write_axis_units(out, 0);
     write_axis_units(out, 1);
@@ -336,7 +334,6 @@ static void write_box(FILE * out)
 /* write ending postscript comments */
 static void write_footer(FILE * out)
 {
-    fprintf(out, "%%%%PageTrailer\n");
     fprintf(out, "%%%%Trailer\n");
     fprintf(out, "%%%%EOF\n\n");
 }
