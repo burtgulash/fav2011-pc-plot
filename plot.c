@@ -132,14 +132,14 @@ static void plot(FILE * out, parsed_expr p)
         y_1 = y_low;
     else if (y_1 > y_high)
         y_1 = y_high;
-	else
-		last_out = 0;
+    else
+        last_out = 0;
 
     fprintf(out, "newpath\n");
     if (!IS_NAN(y_1))
         MOVETO(x_1, y_1);
-	else
-		last_nan = 1;
+    else
+        last_nan = 1;
 
 
     old_x = x_1;
@@ -157,14 +157,14 @@ static void plot(FILE * out, parsed_expr p)
             } else if (last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
-					if (IS_NAN(x_intersect))
-						x_intersect = x_1;
-					MOVETO(x_intersect, y_low);
+                    if (IS_NAN(x_intersect))
+                        x_intersect = x_1;
+                    MOVETO(x_intersect, y_low);
                 } else {
                     x_intersect = INTERSECT(y_high);
                     if (IS_NAN(x_intersect))
-						x_intersect = x_1;
-					MOVETO(x_intersect, y_high);
+                        x_intersect = x_1;
+                    MOVETO(x_intersect, y_high);
                 }
             }
             LINETO(x_2, y_2);
@@ -175,13 +175,13 @@ static void plot(FILE * out, parsed_expr p)
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_high);
                     if (IS_NAN(x_intersect))
-						x_intersect = x_1;
-					LINETO(x_intersect, y_high);
+                        x_intersect = x_1;
+                    LINETO(x_intersect, y_high);
                 } else {
                     x_intersect = INTERSECT(y_low);
                     if (IS_NAN(x_intersect))
-						x_intersect = x_1;
-					LINETO(x_intersect, y_low);
+                        x_intersect = x_1;
+                    LINETO(x_intersect, y_low);
                 }
             }
 
