@@ -250,10 +250,10 @@ static void write_axis_units(FILE * out, int horizontal)
     else 
         size = y_high - y_low;
 
-    power = ceil(log10(size / MAX_UNITS) - 1);
-    if (size / (2 * pow(10, power)) <= MAX_UNITS)
+    power = ceil(log10(size / (MAX_UNITS - 1)) - 1);
+    if (size / (2 * pow(10, power)) < MAX_UNITS)
         axis_scale = 2;
-    else if (size / (5 * pow(10, power)) <= MAX_UNITS)
+    else if (size / (5 * pow(10, power)) < MAX_UNITS)
         axis_scale = 5;
     else {
         axis_scale = 1;
@@ -264,11 +264,11 @@ static void write_axis_units(FILE * out, int horizontal)
     /* TODO doesn't work properly  when x_low negative */
     if (horizontal) {
         unit_position = x_low - fmod(x_low, unit_size);
-        if (x_low >= 0)
+        if (x_low > 0)
             unit_position += unit_size;
     } else {
         unit_position = y_low - fmod(y_low, unit_size);
-        if (y_low >= 0)
+        if (y_low > 0)
             unit_position += unit_size;
     }
 
