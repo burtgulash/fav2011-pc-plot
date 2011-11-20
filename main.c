@@ -6,22 +6,26 @@
 #include "plot.h"
 
 
-Limits * parse_limits(char * lim_string)
+/* 
+ * Parses string containing encoded plot limits and writes then to 'limits' 
+ * returns 1 on success, 0 if parse error.
+ */
+int parse_limits(Limits * limits, char * lim_string)
 {
     token * tok;
-    Limits * limits;
     char * tmp;
     int i, lim_pos = 0, sign = 1;
 
-    limits = (Limits*) malloc(sizeof(Limits));            
+    if (!limits)
+        return 0;
+
     for (i = 0; i < 4; i++) {
         if (i > 0) {
             tok = next_tok(lim_string, lim_pos);
             if (tok->type != T_COLON) {
                 (void) parse_error(tok, "Delimiter expected");
                 free(tok);
-                free(limits);
-                return NULL;
+                return 0;
             }
             lim_pos += tok->len;
             free(tok);
@@ -53,21 +57,30 @@ Limits * parse_limits(char * lim_string)
                 (void) parse_error(tok, "Number expected");
                 free(tmp);
                 free(tok);
-                free(limits);
-                return NULL;
+                return 0;
         }
         lim_pos += tok->len;
         free(tmp);
         free(tok);
     }
 
+    /* check if last token is eof */
+    tok = next_tok(lim_string, lim_pos);
+    if (tok->type != T_EOF) {
+        (void) parse_error(tok, "Redundant");
+        free(tok);
+        return 0;
+    }
+    free(tok);
+
+
+
     if (limits->x_low >= limits->x_high || limits->y_low >= limits->y_high) {
         fprintf(stderr, "Low limit must be less than high limit\n");
-        free(limits);
-        return NULL;
+        return 0;
     }
 
-    return limits;
+    return 1;
 }
 
 
@@ -83,12 +96,12 @@ int main(int argc, char ** argv)
             if (argc == 2)
                 write_ps(stdout, parsed, argv[1], NULL);
             else if (argc == 3) {
-                lims = parse_limits(argv[2]);
-                if (lims) {
+                lims = (Limits*) malloc(sizeof(Limits));            
+                if(parse_limits(lims, argv[2]))
                     write_ps(stdout, parsed, argv[1], lims);
-                    free(lims);
-                } else
+                else
                     exit_code = EXIT_FAILURE;
+                free(lims);
             }
         } else
             exit_code = EXIT_FAILURE;

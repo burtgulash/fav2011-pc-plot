@@ -44,7 +44,7 @@ token * next_tok(char * expr, int i)
     char c = expr[i];
     int f, f_len, len, var_len, state;
 
-    if (!c)
+    if (c == '\0')
         return make_tok(T_EOF, i, 1, expr);
 
     if (c == '(') {

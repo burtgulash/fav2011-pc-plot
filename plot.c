@@ -213,7 +213,7 @@ static void plot(FILE * out, parsed_expr p)
     /* stroke the path */
     fprintf(out, "%s setrgbcolor\n", PLOT_COLOR);
     fprintf(out, "0.5 setlinewidth\n");
-    fprintf(out, "stroke\n");
+    fprintf(out, "stroke\n\n\n");
 }
 
 
@@ -233,19 +233,23 @@ static void write_header(FILE * out, char * expression)
 
 
 #define MAX_UNITS 8
+#define LINE_LEN  8
 
-static void write_axis_units(FILE * out) 
+static void write_axis_units(FILE * out, int horizontal) 
 {
     double size;
     double axis_scale;
     double power;
     double unit_size;
     double unit_position;
-    double line_length;
     int print_precision = 0;
 
     /** x axis **/
-    size = x_high - x_low;
+    if (horizontal)
+        size = x_high - x_low;
+    else 
+        size = y_high - y_low;
+
     power = ceil(log10(size / MAX_UNITS) - 1);
     if (size / (2 * pow(10, power)) <= MAX_UNITS)
         axis_scale = 2;
@@ -256,47 +260,76 @@ static void write_axis_units(FILE * out)
         power ++;
     }
 
-    line_length = (y_high - y_low) / 80;
     unit_size = axis_scale * pow(10, power);
     /* TODO doesn't work properly  when x_low negative */
-    unit_position = x_low + unit_size - fmod(x_low, unit_size);
+    if (horizontal) {
+        unit_position = x_low - fmod(x_low, unit_size);
+        if (x_low >= 0)
+            unit_position += unit_size;
+    } else {
+        unit_position = y_low - fmod(y_low, unit_size);
+        if (y_low >= 0)
+            unit_position += unit_size;
+    }
+
     if (power < 0)
         print_precision = - (int) power;
 
+
     fprintf(out, "newpath\n");
 
-    do {
-        MOVETO(unit_position, y_low);
-        LINETO(unit_position, y_low - line_length);
-        MOVETO(unit_position, y_low - 3 * line_length);
-        fprintf(out, "(%.*f) show\n", print_precision, unit_position);
+    if (horizontal) {
+        do {
+            MOVETO(unit_position, y_low);
+            fprintf(out, "%d %d rlineto\n", 0, -LINE_LEN);
+            fprintf(out, "%d %d rmoveto\n", 0, - 2 * LINE_LEN);
+            fprintf(out, "(%.*f) show\n", print_precision, unit_position);
 
-        unit_position += unit_size;
-    } while (unit_position <= x_high);
+            unit_position += unit_size;
+        } while (unit_position <= x_high);
+    } else {
+        do {
+            MOVETO(x_low, unit_position);
+            fprintf(out, "%d %d rlineto\n", -LINE_LEN, 0);
+            fprintf(out, "%d %d rmoveto\n", - 2 * LINE_LEN, 0);
+            fprintf(out, "90 rotate\n");
+            fprintf(out, "(%.*f) show\n", print_precision, unit_position);
+            fprintf(out, "-90 rotate\n");
+
+            unit_position += unit_size;
+        } while (unit_position <= y_high);
+    }
+
 
     fprintf(out, "0 setgray\n");
-    fprintf(out, "0.5 setlinewidth\n");
-    fprintf(out, "stroke\n");
+    fprintf(out, "0.4 setlinewidth\n");
+    fprintf(out, "stroke\n\n");
 }
 
+
+/* Draws box around plot and units */
 static void write_box(FILE * out)
 {
     fprintf(out, "newpath\n");
-    fprintf(out, "%d %d moveto\n", LLX + BLANK, LLY + BLANK);
-    fprintf(out, "%d %d lineto\n", URX - BLANK, LLY + BLANK);
-    fprintf(out, "%d %d lineto\n", URX - BLANK, URY - BLANK);
-    fprintf(out, "%d %d lineto\n", LLX + BLANK, URY - BLANK);
+    MOVETO(x_low, y_low);
+    LINETO(x_high, y_low);
+    LINETO(x_high, y_high);
+    LINETO(x_low, y_high);
     fprintf(out, "closepath\n");
     fprintf(out, "0 setgray\n");
     fprintf(out, "1 setlinewidth\n");
-    fprintf(out, "stroke\n");
+    fprintf(out, "stroke\n\n");
 
     fprintf(out, "/Helvetica findfont\n");
     fprintf(out, "11 scalefont\n");
     fprintf(out, "setfont\n");
-    write_axis_units(out);
+
+    write_axis_units(out, 0);
+    write_axis_units(out, 1);
 }
 
+
+/* write ending postscript comments */
 static void write_footer(FILE * out)
 {
     fprintf(out, "%%%%PageTrailer\n");
@@ -305,6 +338,7 @@ static void write_footer(FILE * out)
 }
 
 
+/* plot parsed expression and write it to postscript file */
 void write_ps(FILE * out, parsed_expr parsed, char * expr, Limits * lim)
 {
     plot_init(parsed.length, lim);
