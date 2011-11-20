@@ -34,8 +34,8 @@ static int sp = 0;
 
 
 /** PLOT x and y LIMITS **/
-static double x_left = -10;
-static double x_right = 10;
+static double x_low = -10;
+static double x_high = 10;
 static double y_low = -10;
 static double y_high = 10;
 
@@ -83,8 +83,8 @@ double evaluate(parsed_expr p, double x)
 int plot_init(int size, Limits * lims)
 {
     if (lims) {
-        x_left  = lims->x_low;
-        x_right = lims->x_high;
+        x_low  = lims->x_low;
+        x_high = lims->x_high;
         y_low   = lims->y_low;
         y_high  = lims->y_high;
     }
@@ -92,7 +92,7 @@ int plot_init(int size, Limits * lims)
     stack = (double*) calloc(size, sizeof(double));
     sp = 0;
 
-    scale_x = (URX - LLX - 2*BLANK) / (x_right - x_left);
+    scale_x = (URX - LLX - 2*BLANK) / (x_high - x_low);
     scale_y = (URY - LLY - 2*BLANK) / (y_high - y_low);
     return 1;
 }
@@ -101,9 +101,9 @@ int plot_init(int size, Limits * lims)
 
 static void plot(FILE * out, parsed_expr p)
 {
-    double delta = (x_right - x_left) / SMOOTHNESS;
-    double x_1 = x_left;
-    double x_2 = x_left + delta;
+    double delta = (x_high - x_low) / SMOOTHNESS;
+    double x_1 = x_low;
+    double x_2 = x_low + delta;
     double y_1 = evaluate(p, x_1);
     double y_2 = evaluate(p, x_2);
     double old_x;
@@ -121,7 +121,7 @@ static void plot(FILE * out, parsed_expr p)
 
 
 /** real coordinates to postscript plot coordinates transformation **/
-#define COORD_X(x) (((x) - x_left) * scale_x + LLX + BLANK)
+#define COORD_X(x) (((x) - x_low) * scale_x + LLX + BLANK)
 #define COORD_Y(y) (((y) - y_low) * scale_y + LLY + BLANK)
 
 #define LINETO(x, y) fprintf(out, "%.3f %.3f lineto\n", \
@@ -142,7 +142,7 @@ static void plot(FILE * out, parsed_expr p)
 
     /* plotting loop */
     /* x_intersect produces nans for functinos like sin(x^100) */
-    while (x_2 <= x_right) {
+    while (x_2 <= x_high) {
 
         if (y_low <= y_2 && y_2 <= y_high) {
             if (last_out) {
@@ -204,8 +204,8 @@ static void plot(FILE * out, parsed_expr p)
         }
 
         /* make sure the last point is on the right boundary */
-        if (x_1 < x_right && x_1 + delta > x_right) {
-            x_2 = x_right;
+        if (x_1 < x_high && x_1 + delta > x_high) {
+            x_2 = x_high;
             y_2 = evaluate(p, x_2);
         }
     }
@@ -219,7 +219,7 @@ static void plot(FILE * out, parsed_expr p)
 
 static void write_header(FILE * out, char * expression)
 {
-    fprintf(out, "%%!PS-Adobe-3.0 EPSF 3.0\n");
+    fprintf(out, "%%!PS-Adobe-3.0\n");
     fprintf(out, "%%%%DocumentMedia: Letter %d %d 0 () ()\n", 
                                                   LLX + URX, LLY + URY);
     fprintf(out, "%%%%Title: Plot %s\n", expression);
@@ -229,6 +229,54 @@ static void write_header(FILE * out, char * expression)
     fprintf(out, "%%%%BoundingBox: %d %d %d %d\n", LLX, LLY, URX, URY);
     fprintf(out, "%%%%EndComments\n\n");
     fprintf(out, "%%%%Page: 1 1\n");
+}
+
+
+#define MAX_UNITS 8
+
+static void write_axis_units(FILE * out) 
+{
+    double size;
+    double axis_scale;
+    double power;
+    double unit_size;
+    double unit_position;
+    double line_length;
+    int print_precision = 0;
+
+    /** x axis **/
+    size = x_high - x_low;
+    power = ceil(log10(size / MAX_UNITS) - 1);
+    if (size / (2 * pow(10, power)) <= MAX_UNITS)
+        axis_scale = 2;
+    else if (size / (5 * pow(10, power)) <= MAX_UNITS)
+        axis_scale = 5;
+    else {
+        axis_scale = 1;
+        power ++;
+    }
+
+    line_length = (y_high - y_low) / 80;
+    unit_size = axis_scale * pow(10, power);
+    /* TODO doesn't work properly  when x_low negative */
+    unit_position = x_low + unit_size - fmod(x_low, unit_size);
+    if (power < 0)
+        print_precision = - (int) power;
+
+    fprintf(out, "newpath\n");
+
+    do {
+        MOVETO(unit_position, y_low);
+        LINETO(unit_position, y_low - line_length);
+        MOVETO(unit_position, y_low - 3 * line_length);
+        fprintf(out, "(%.*f) show\n", print_precision, unit_position);
+
+        unit_position += unit_size;
+    } while (unit_position <= x_high);
+
+    fprintf(out, "0 setgray\n");
+    fprintf(out, "0.5 setlinewidth\n");
+    fprintf(out, "stroke\n");
 }
 
 static void write_box(FILE * out)
@@ -242,6 +290,11 @@ static void write_box(FILE * out)
     fprintf(out, "0 setgray\n");
     fprintf(out, "1 setlinewidth\n");
     fprintf(out, "stroke\n");
+
+    fprintf(out, "/Helvetica findfont\n");
+    fprintf(out, "11 scalefont\n");
+    fprintf(out, "setfont\n");
+    write_axis_units(out);
 }
 
 static void write_footer(FILE * out)
