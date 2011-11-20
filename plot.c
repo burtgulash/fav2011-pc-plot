@@ -110,13 +110,8 @@ static void plot(FILE * out, parsed_expr p)
     double old_y;
     /* if y-value out of box, compute intersection of line with box */
     double x_intersect;
-    int last_out = 0;
+    int last_out = 0, last_nan = 0;
     int SMOOTHNESS_LVL = MAX_SMOOTHNESS_LVL;
-
-    if (y_1 < y_low)
-        y_1 = y_low;
-    else if (y_1 > y_high)
-        y_1 = y_high;
 
 
 
@@ -133,19 +128,29 @@ static void plot(FILE * out, parsed_expr p)
 #define INTERSECT(boundary) (x_1 + ((boundary) - y_1) * \
                             (x_2 - x_1) / (y_2 - y_1));
 
+    if (y_1 < y_low)
+        y_1 = y_low;
+    else if (y_1 > y_high)
+        y_1 = y_high;
+
     fprintf(out, "newpath\n");
-    MOVETO(x_1, y_1);
+    if (!IS_NAN(y_1))
+        MOVETO(x_1, y_1);
 
 
     old_x = x_1;
     old_y = y_1;
 
     /* plotting loop */
-    /* x_intersect produces nans for functinos like sin(x^100) */
     while (x_2 <= x_high) {
 
-        if (y_low <= y_2 && y_2 <= y_high) {
-            if (last_out) {
+        if (IS_NAN(y_2))
+            last_nan = 1;
+        else if (y_low <= y_2 && y_2 <= y_high) {
+            if (last_nan) {
+                MOVETO(x_2, y_2);
+                last_nan = 0;
+            } else if (last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
                     if (!IS_NAN(x_intersect))
@@ -232,7 +237,7 @@ static void write_header(FILE * out, char * expression)
 }
 
 
-#define MAX_UNITS 8
+#define MAX_UNITS 7
 #define LINE_LEN  8
 
 static void write_axis_units(FILE * out, int horizontal) 
@@ -250,7 +255,7 @@ static void write_axis_units(FILE * out, int horizontal)
     else 
         size = y_high - y_low;
 
-    power = ceil(log10(size / (MAX_UNITS - 1)) - 1);
+    power = ceil(log10(size / MAX_UNITS) - 1);
     if (size / (2 * pow(10, power)) < MAX_UNITS)
         axis_scale = 2;
     else if (size / (5 * pow(10, power)) < MAX_UNITS)
@@ -261,7 +266,6 @@ static void write_axis_units(FILE * out, int horizontal)
     }
 
     unit_size = axis_scale * pow(10, power);
-    /* TODO doesn't work properly  when x_low negative */
     if (horizontal) {
         unit_position = x_low - fmod(x_low, unit_size);
         if (x_low > 0)
