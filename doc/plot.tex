@@ -1,9 +1,10 @@
 \documentclass[11pt]{article}
 \usepackage[czech]{babel}
 \usepackage[utf8]{inputenc}
-\usepackage{a4wide}
+%% \usepackage{a4wide}
 
-\usepackage[pdf]{pstricks}
+\newcommand\CARET{\mathbin{\char`\^}}
+
 
 \title{Vizualizace grafu matematické funkce}
 \author{Tomáš Maršálek}
@@ -19,8 +20,8 @@ provede její analýzu a vytvoří soubor ve formátu PostScript s grafem této
 funkce na zvoleném definičním oboru.
 
 \section{Analýza úlohy}
-Abychom mohli zobrazit graf funkce jako například x\^2 + sin(x), musíme být
-nejdříve schopni vyhodnotit tuto funkci numericky. Tedy musíme ve výrazu
+Abychom mohli zobrazit graf funkce jako například x $\CARET$ 2 + sin(x), musíme
+být nejdříve schopni vyhodnotit tuto funkci numericky. Tedy musíme ve výrazu
 rozpoznat jednotlivá čísla, proměnné nebo operátory a rozpoznat jejich význam.
 Standardním postupem při parsování vstupního řetězce je rozdělení úlohy na
 několik po sobě následujících částí tak, aby se případné chyby ve vstupu
@@ -52,14 +53,15 @@ které operátor vyžaduje, jsou čísla.
 
 Příklad infixové a postfixové notace.
 \begin{center}
-\begin{tabular}{|c|c|}
+\begin{tabular}{|l|l|}
 \hline
 infix & postfix \\
-\hline \hline
-$1~+~1$ & $1~1~+$ \\
-$1~+~2~*~3$ & $1~2~3~*~+$ \\
-$(1~+~2)~*~3$ & $1~2~+~3~*$ \\
-$x~*~\sin(x^2)$ & $x~x~2~\verb|^|~\sin~*$ \\
+\hline
+1 + 1 & 1 1 + \\
+1 + 2 * 3 & 1 2 3 * + \\
+(1 + 2) * 3 & 1 2 + 3 * \\
+x * $\sin$ (x $\CARET$ 2) & x x 2 $\CARET$ $\sin$ * \\
+1 - 2 - 3 + 4 $\CARET$ 5 $\CARET$ 6 & 1 2 - 3 - 4 5 6 $\CARET$ $\CARET$ + \\
 \hline
 \end{tabular}
 \end{center}
@@ -74,7 +76,7 @@ $1 + 2 * 3$ se musí přeložit jako $1~2~3~*~+$ a ne jako $1~2~+~3~*$.  Dále t
 levou nebo pravou asociaci nekomutativních operátorů, pokud ve výrazů chybí
 závorky.  Například operátor odčítání upřednostňuje levé uzávorkování ($1 - 2 -
 3 = ((1 - 2) - 3)$) oproti umocňování, které naopak upřednostňuje uzávorkování
-zprava ($2~\verb|^|~3~\verb|^|~4 = (2~\verb|^|~(3~\verb|^|~4)) = 2^{3^4}$).
+zprava ($2~\CARET~3~\CARET~4 = (2~\CARET~(3~\CARET~4)) = 2^{3^4}$).
 
 Algoritmus používá pomocný zásobník na odkládání operátorů, dokud nemá jistotu
 o jejich správném umístění v postfixu. Čteme infixový výraz zleva doprava po
@@ -86,7 +88,7 @@ Právě vytažený symbol pak pouze vložíme na zásobník. Až nám dojdou vš
 symboly, pouze vytáhneme všechny operátory ze zásobníku a v tomto pořadí je
 přidáme do výsledku. \\
 
-Jako příklad mějme výraz 1 / 2~\verb|^|~3 + 4.
+Jako příklad mějme výraz 1 / 2~$\CARET$~3 + 4.
 \begin{center}
 \begin{tabular}{|c|l|l|r|}
 \hline
@@ -95,19 +97,55 @@ symbol & výsledek & zásobník & akce \\
 1 & 1 & & číslo, pouze přidáme do fronty \\
 / & 1 & / & dosud žádný operátor v zásobníku\\
 2 & 1 2 & / & číslo, pouze přidáme do fronty \\
-\verb|^| & 1 2 & / \verb|^| & / má slabší vazbu než \verb|^|, necháme být \\
-3 & 1 2 3 & / \verb|^| & číslo, pouze přidáme do fronty \\
-+ & 1 2 3 \verb|^| / & + & \verb|^| a / mají silnější vazbu než +, 
-přidáme je do fronty\\
-4 & 1 2 3 \verb|^| / 4 & + & číslo, pouze přidáme do fronty \\
-  & 1 2 3 \verb|^| / 4 + & & konec, všechny operátory přidáme do fronty \\
+$\CARET$ & 1 2 & / $\CARET$ & / má slabší vazbu než $\CARET$, necháme být \\
+3 & 1 2 3 & / $\CARET$ & číslo, pouze přidáme do fronty \\
++ & 1 2 3 $\CARET$ / & + & $\CARET$ a / mají silnější vazbu než + \\
+4 & 1 2 3 $\CARET$ / 4 & + & číslo, pouze přidáme do fronty \\
+konec  & 1 2 3 $\CARET$ / 4 + & & konec, přidáme všechny operátory \\
 
 \hline
 \end{tabular}
 \end{center}
 
+\subsection{Zobrazení grafu}
+Jednoduchým řešením jak zobrazit funkci je vyhodnotit vždy dva sousední body a
+spojit je úsečkou. Důležité je pouze zvolit dostatečně detailný rozdělení osy
+x, aby graf nebyl kostrbatý.
 
 
 \section{Implementace}
+\paragraph{Lexer} 
+je konstruován jako deterministický automat, který rozpoznává celá čísla v
+šestnáctkové, desítkové a osmičkové soustavě, floating point čísla, proměnnou
+x, operátory a závorky. Mezery rovnou zahazuje. V případě chyby posílá chybový
+token do další fáze. 
+\paragraph{Parser}
+je implementace Shunting yard algoritmu, která navíc kontroluje syntaktické
+chyby. Výsledek je vrácen jako posloupnost symbolů, které ale musí být po
+skončení používání dealokovány. Pro zjednoduššení jsou všechny tokeny a
+přeložené symboly uchovány v pomocných polích, aby na konci došlo k jejich
+bezchybnému dealokování. Pomocnou datovou strukturu zde tvoří pouze zásobník,
+který se využívá při Shunting yard algoritmu a poté při kontrolním průchodu
+výsledným postfixovým výrazem.
+\paragraph{Zobrazení grafu}
+je zajištěno dalším odděleným modulem. Ten nejprve zkonstruuje hlavičku
+postscriptového souboru podle specifikace postscriptu. 
+
+Poté je funkce vyhodnocena v klíčových bodech, které jsou poté transformovány
+na souřadnice postscriptového formátu stránky a spojeny úsečkami tak, jak bylo
+popsáno v analýze úlohy. 
+
+Dalším krokem je vytvoření rámečku grafu a pro přehlednost rozdělení obou os.
+Velikost jednotlivých dílků je vybrána tak, aby rozdělení osy nebylo příliš
+husté ani řídké, a podle konvence, že dílky mají velikost pouze 1, 2 nebo 5
+krát mocnina deseti.
+
+Nakonec jsou zapsány závěrečné postscriptové komentáře a soubor je uzavřen.
+
+
+Volitelný parametr popisující defiční obor a obor hodnot je analyzován stejným
+lexerem, ale má vlastní parsovací funkci.
+
+
 \section{Závěr}
 \end{document}
