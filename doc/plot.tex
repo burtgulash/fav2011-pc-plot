@@ -19,6 +19,95 @@ provede její analýzu a vytvoří soubor ve formátu PostScript s grafem této
 funkce na zvoleném definičním oboru.
 
 \section{Analýza úlohy}
+Abychom mohli zobrazit graf funkce jako například x\^2 + sin(x), musíme být
+nejdříve schopni vyhodnotit tuto funkci numericky. Tedy musíme ve výrazu
+rozpoznat jednotlivá čísla, proměnné nebo operátory a rozpoznat jejich význam.
+Standardním postupem při parsování vstupního řetězce je rozdělení úlohy na
+několik po sobě následujících částí tak, aby se případné chyby ve vstupu
+odhalily v příslušné části a nepropagovaly se do následující části. Každá část
+se tedy stará pouze o chyby, které se jí týkají.
+
+\subsection{Lexikální analýza}
+Místo abychom při vyhodnocování výrazu postupně hledali čísla nebo operátory,
+ponecháme tuto úlohu specializovanému nástroji, takzvanému scanneru.
+Nadefinujeme jednotlivé symboly a necháme si od scanneru vrátit rozpoznané
+symboly nebo případně chybu, pokud nebyl symbol rozpoznán. Význam celé této
+fáze je v zjednodušení nadcházející fáze, která je složitější, a už se nebude
+muset zabývat problémy typu jestli je symbol skutečně číslo nebo jestli je
+symbol $\sin$ ve skutečnosti $\sinh$ a podobně.
+
+\subsection{Syntaktická a sémantická analýza}
+Tyto dvě fáze jsou zde kombinované v jednu. Zde vytvoříme přeloženou datovou
+strukturu, se kterou bude vyhodnocování výrazu víceméně triviální. Syntaktická
+analýza najde syntaktické chyby, jako například dvě čísla nebo znaky
+následující po sobě, chybějící závorky, a podobně. Jednotlivým symbolům přiřadíme jejich význam, tj. číslům dát jejich numerickou hodnotu a operátorům 
+jejich příslušnou unární nebo binární funkci. 
+
+\subsection{Postfixová notace}
+Výsledná datová struktura je posloupnost symbolů v postfixové nebo také
+reverzní polské notaci. Výhoda tohoto zápisu oproti klasické infixové notaci
+je absence závorek a jednoduchost vyhodnocení výrazu, při vyhodnocování totiž
+vždy když narazíme na operátor, máme jistotu, že všechny předcházející znaky, 
+které operátor vyžaduje, jsou čísla.
+
+Příklad infixové a postfixové notace.
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+infix & postfix \\
+\hline \hline
+$1~+~1$ & $1~1~+$ \\
+$1~+~2~*~3$ & $1~2~3~*~+$ \\
+$(1~+~2)~*~3$ & $1~2~+~3~*$ \\
+$x~*~\sin(x^2)$ & $x~x~2~\verb|^|~\sin~*$ \\
+\hline
+\end{tabular}
+\end{center}
+
+Metoda na převedení infixového do postfixového zápisu je např. Dijkstrův
+Shunting yard algoritmus.
+
+
+\subsection{Shunting yard}
+Při konverzi musíme mít na paměti přednosti jednotlivých operátorů, tedy výraz
+$1 + 2 * 3$ se musí přeložit jako $1~2~3~*~+$ a ne jako $1~2~+~3~*$.  Dále také
+levou nebo pravou asociaci nekomutativních operátorů, pokud ve výrazů chybí
+závorky.  Například operátor odčítání upřednostňuje levé uzávorkování ($1 - 2 -
+3 = ((1 - 2) - 3)$) oproti umocňování, které naopak upřednostňuje uzávorkování
+zprava ($2~\verb|^|~3~\verb|^|~4 = (2~\verb|^|~(3~\verb|^|~4)) = 2^{3^4}$).
+
+Algoritmus používá pomocný zásobník na odkládání operátorů, dokud nemá jistotu
+o jejich správném umístění v postfixu. Čteme infixový výraz zleva doprava po
+jednotlivých symbolech a vždy když narazíme na symbol typu číslo nebo proměnná,
+pouze ho uložíme do výsledné výstupní fronty. Pokud narazíme na operátor,
+všechny operátory, které dosud leží nahoře v zásobníku a vážou se těsněji (mají
+vyšší precedenci) než právě vytažený symbol, můžeme přidat do výsledné fronty.
+Právě vytažený symbol pak pouze vložíme na zásobník. Až nám dojdou všechny
+symboly, pouze vytáhneme všechny operátory ze zásobníku a v tomto pořadí je
+přidáme do výsledku. \\
+
+Jako příklad mějme výraz 1 / 2~\verb|^|~3 + 4.
+\begin{center}
+\begin{tabular}{|c|l|l|r|}
+\hline
+symbol & výsledek & zásobník & akce \\
+\hline
+1 & 1 & & číslo, pouze přidáme do fronty \\
+/ & 1 & / & dosud žádný operátor v zásobníku\\
+2 & 1 2 & / & číslo, pouze přidáme do fronty \\
+\verb|^| & 1 2 & / \verb|^| & / má slabší vazbu než \verb|^|, necháme být \\
+3 & 1 2 3 & / \verb|^| & číslo, pouze přidáme do fronty \\
++ & 1 2 3 \verb|^| / & + & \verb|^| a / mají silnější vazbu než +, 
+přidáme je do fronty\\
+4 & 1 2 3 \verb|^| / 4 & + & číslo, pouze přidáme do fronty \\
+  & 1 2 3 \verb|^| / 4 + & & konec, všechny operátory přidáme do fronty \\
+
+\hline
+\end{tabular}
+\end{center}
+
+
+
 \section{Implementace}
 \section{Závěr}
 \end{document}
