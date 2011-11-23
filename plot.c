@@ -11,7 +11,7 @@
 /* higher -> less postscript lines, but slower and occasionally will fail
    on smooth-then-dense plots (eg. sin(1/x^60) from -10 to 10) */
 #define MAX_SMOOTHNESS_LVL 4
-#define LIM .002
+#define TRESHOLD .002
 
 
 /** BOX PARAMETERS **/
@@ -171,7 +171,7 @@ static void plot(FILE * out, parsed_expr p)
 
             last_out = 0;
         } else {
-            if (!last_out) {
+            if (!last_out && !last_nan) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_high);
                     if (IS_NAN(x_intersect))
@@ -191,8 +191,8 @@ static void plot(FILE * out, parsed_expr p)
 /** smoothing procedure **/
 /* SLOPE_JUMP <- second derivative */
 #define SLOPE_JUMP (y_2 - y_1 - ((y_1 - old_y)*(x_2 - x_1))/(x_1 - old_x))
-#define TOO_SHARP() (fabs(SLOPE_JUMP) > LIM)
-#define TOO_SMOOTH() (fabs(SLOPE_JUMP) < LIM / 4)
+#define TOO_SHARP() (fabs(SLOPE_JUMP) > TRESHOLD)
+#define TOO_SMOOTH() (fabs(SLOPE_JUMP) < TRESHOLD / 4)
 
         old_x = x_1;
         old_y = y_1;
