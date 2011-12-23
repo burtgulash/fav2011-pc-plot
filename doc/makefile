@@ -1,5 +1,5 @@
 latexfile = plot
-figures   = 
+figures   = figures/figure1.eps figures/figure2.eps figures/figura1.eps
 helpfiles = makefile
 
 

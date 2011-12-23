@@ -1,6 +1,7 @@
 \documentclass[11pt]{article}
 \usepackage[czech]{babel}
 \usepackage[utf8]{inputenc}
+\usepackage{graphicx}
 %% \usepackage{a4wide}
 
 \newcommand\CARET{\mathbin{\char`\^}}
@@ -126,6 +127,19 @@ protože u funkcí typu $f(x) = sin(1/x)$ by došlo kolem nuly k nekonečnému
 půlení. Stejným výpočtem se snažíme zajistit co nejdelší interval, abychom
 zbytečně neplýtvali úsečkami. 
 
+\begin{figure}[ht!]
+\centering
+	\includegraphics[width=11cm]{figures/figure2.eps}
+	\caption{Rozdělení osy x grafu funkce $x^3$}
+\end{figure}
+\begin{figure}[ht!]
+\centering
+	\includegraphics[width=11cm]{figures/figure1.eps}
+	\caption{Rozdělení osy x grafu funkce
+		$\sin \left(x + \cos \left(\frac{1}{x} \right) \right)$}
+\end{figure}
+
+\clearpage
 Zřejmým problémem jsou funkce, které v některých bodech zadaného intervalu
 rostou limitně do nekonečna, případně nejsou na daném intervalu definovány.
 Případ, kdy funkce pokračuje mimo zadanou hranici, případně až do nekonečna je
