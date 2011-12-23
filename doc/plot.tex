@@ -25,29 +25,30 @@ být nejdříve schopni vyhodnotit tuto funkci numericky. Tedy musíme ve výraz
 rozpoznat jednotlivá čísla, proměnné nebo operátory a rozpoznat jejich význam.
 Standardním postupem při parsování vstupního řetězce je rozdělení úlohy na
 několik po sobě následujících částí tak, aby se případné chyby ve vstupu
-odhalily v příslušné části a nepropagovaly se do následující části. Každá část
+odhalily v příslušné části a nepropagovaly se do následující. Každá část
 se tedy stará pouze o chyby, které se jí týkají.
 
 \subsection{Lexikální analýza}
 Místo abychom při vyhodnocování výrazu postupně hledali čísla nebo operátory,
 ponecháme tuto úlohu specializovanému nástroji, takzvanému scanneru nebo také
-lexeru.  Nadefinujeme jednotlivé symboly a necháme si od scanneru vrátit
-rozpoznané symboly nebo případně chybu, pokud nebyl symbol rozpoznán. Význam
-celé této fáze je v zjednodušení nadcházející fáze, která je složitější, a už
-se nebude muset zabývat problémy typu jestli je symbol skutečně číslo nebo
-jestli je symbol $\sin$ ve skutečnosti $\sinh$ a podobně.
+lexeru.  Nadefinujeme jednotlivé symboly a necháme scanner, aby je ve vstupním
+řetězci rozpoznal, nebo aby případně rozpoznal lexikální chyby.  Význam celé
+této fáze je v zjednodušení nadcházející fáze, která je složitější, a už se
+nebude muset zabývat problémy typu jestli je symbol skutečně číslo nebo jestli
+symbol \uv{sin} je ve skutečnosti \uv{sinh} a podobně.
 
 \subsection{Syntaktická a sémantická analýza}
-Tyto dvě fáze jsou zde kombinované v jednu. Zde vytvoříme přeloženou datovou
+Tyto dvě fáze jsou zde kombinované v jednu. Vytvoříme přeloženou datovou
 strukturu, se kterou bude vyhodnocování výrazu víceméně triviální. Syntaktická
-analýza najde syntaktické chyby, jako například dvě čísla nebo znaky
-následující po sobě, chybějící závorky, a podobně. Jednotlivým symbolům přiřadíme jejich význam, tj. číslům dát jejich numerickou hodnotu a operátorům 
+analýza najde chyby týkající se skladby výrazu, jako například dvě čísla nebo
+znaky následující po sobě, chybějící závorky, a podobně. Jednotlivým symbolům
+přiřadíme jejich význam, tj. číslům jejich numerickou hodnotu a operátorům
 jejich příslušnou unární nebo binární funkci. 
 
 \subsection{Postfixová notace}
 Výsledná datová struktura je posloupnost symbolů v postfixové nebo také
 reverzní polské notaci. Výhoda tohoto zápisu oproti klasické infixové notaci
-je absence závorek a jednoduchost vyhodnocení výrazu, při vyhodnocování totiž
+je absence závorek a jednoduchost vyhodnocení výrazu. Při vyhodnocování totiž
 vždy když narazíme na operátor, máme jistotu, že všechny předcházející znaky, 
 které operátor vyžaduje, jsou čísla.
 
@@ -71,7 +72,7 @@ Shunting yard algoritmus.
 
 
 \subsection{Shunting yard}
-Při konverzi musíme mít na paměti přednosti jednotlivých operátorů, tedy výraz
+Při konverzi musíme mít na paměti přednosti jednotlivých operátorů. Výraz
 $1 + 2 * 3$ se musí přeložit jako $1~2~3~*~+$ a ne jako $1~2~+~3~*$.  Dále také
 levou nebo pravou asociaci nekomutativních operátorů, pokud ve výrazů chybí
 závorky.  Například operátor odčítání upřednostňuje levé uzávorkování ($1 - 2 -
@@ -86,7 +87,7 @@ všechny operátory, které dosud leží nahoře v zásobníku a vážou se těs
 vyšší precedenci) než právě vytažený symbol, můžeme přidat do výsledné fronty.
 Právě vytažený symbol pak pouze vložíme na zásobník. Až nám dojdou všechny
 symboly, pouze vytáhneme všechny operátory ze zásobníku a v tomto pořadí je
-přidáme do výsledku. \\
+přidáme do výsledné fronty. \\
 
 Jako příklad mějme výraz 1 / 2~$\CARET$~3 + 4.
 \begin{center}
@@ -112,16 +113,18 @@ Jednoduchým řešením jak zobrazit funkci je vyhodnotit vždy dva sousední bo
 spojit je úsečkou. Důležité je pouze zvolit dostatečně detailní rozdělení osy
 x, aby graf nebyl kostrbatý.
 
-Lepším řešením by však mohlo být adaptivní vyhlazování, protože rozhodně
-nechceme, aby graf funkce $f(x) = x$ byl stejně detailní jako graf funkce $f(x)
-= sin(1/x)$, který je kolem nuly velmi detailní. Taktika je poměrně jednoduchá.
-Mějme zvolené nějaké počáteční rozdělení osy x a pokud při zobrazování
-jednotlivých úseček zjistíme, že by došlo k příliš velkému skoku ve sklonu dvou
-sousedních úseček (výpočetně by druhá diference přesahovala jistý zvolený
-práh), rozdělíme interval mezi $x_i$ a $x_{i + 1}$ na polovinu. Samozřejmě
-musíme mít nějaký limit tohoto půlení, protože u funkcí typu $f(x) = sin(1/x)$
-by došlo k nekonečnému půlení. Stejným výpočtem se snažíme zajistit co nejdelší
-interval, abychom zbytečně neplýtvali úsečkami. 
+Úsporná metoda, která řeší kostrbatost zobrazené funkce je adaptivní
+vyhlazování. Šetření zobrazenými přímkami oceníme zejména u jednoduchých
+funkcí, protože rozhodně nepotřebujeme, aby graf funkce $f(x) = x$ byl stejně
+detailní jako graf funkce $f(x) = sin(1/x)$, který je kolem nuly velmi
+detailní. Taktika je poměrně jednoduchá.  Mějme zvolené nějaké počáteční
+rozdělení osy x a pokud při zobrazování jednotlivých úseček zjistíme, že by
+došlo k příliš velkému skoku ve sklonu dvou sousedních úseček (výpočetně by
+druhá diference přesahovala jistý zvolený práh), rozdělíme interval mezi $x_i$
+a $x_{i + 1}$ na polovinu. Samozřejmě musíme mít nějaký limit tohoto půlení,
+protože u funkcí typu $f(x) = sin(1/x)$ by došlo kolem nuly k nekonečnému
+půlení. Stejným výpočtem se snažíme zajistit co nejdelší interval, abychom
+zbytečně neplýtvali úsečkami. 
 
 Zřejmým problémem jsou funkce, které v některých bodech zadaného intervalu
 rostou limitně do nekonečna, případně nejsou na daném intervalu definovány.
@@ -131,9 +134,9 @@ hranice, stačí vypočítat průsečík horní nebo dolní hranice s úsečkou 
 posledním bodem a bodem, který už by byl mimo graf a vést kratší úsečku do
 tohoto průsečíku. 
 
-Horší jsou funkce, které nejsou definovány. Implementace
+Horší jsou funkce, které nejsou definovány v určitém místě. Implementace
 těchto funkcí v matematické knihovně v takových případech vracejí hodnotu NaN.
-výpočet průsečíku s takovým číslem nedává smysl a předefinování knihovních
+Výpočet průsečíku s takovým číslem nedává smysl a předefinování knihovních
 funkcí na vlastní, které by vracely alespoň nekonečna namísto NaN způsobuje
 jiné nežádoucí artefakty. Například předefinování logaritmů pro záporné hodnoty
 na záporné nekonečno funguje dokud nezobrazíme nějakou transformaci tohoto

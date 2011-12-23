@@ -55,7 +55,7 @@ parsed_expr parse_error(token * tok, const char * error_msg)
 {
     parsed_expr error_expr = {0, NULL};
     fprintf(stderr, "%s: %s\n", error_msg, tok->context);
-    fprintf(stderr, "%*s^\n", strlen(error_msg) + 2 + tok->pos, "");
+    fprintf(stderr, "%*s^\n", (int) strlen(error_msg) + 2 + tok->pos, "");
 
     return error_expr;
 }

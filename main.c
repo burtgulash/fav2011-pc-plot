@@ -5,6 +5,7 @@
 #include "parser.h"
 #include "plot.h"
 
+#define USAGE "usage: graph.exe FUNCTION FILE [LIMITS]\n"
 
 /* 
  * Parses string containing encoded plot limits and writes then to 'limits' 
@@ -118,6 +119,9 @@ int main(int argc, char ** argv)
         dispose(parsed);
     } else
         exit_code = EXIT_FAILURE;
+
+	if (exit_code == EXIT_FAILURE)
+		fprintf(stderr, USAGE);
 
     return exit_code;
 }
