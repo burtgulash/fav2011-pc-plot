@@ -2,6 +2,7 @@
 \usepackage[czech]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
+\usepackage{epstopdf}
 %% \usepackage{a4wide}
 
 \newcommand\CARET{\mathbin{\char`\^}}
@@ -12,7 +13,16 @@
 \date{\today}
 
 \begin{document}
-\maketitle
+
+\begin{titlepage}
+\begin{center}
+	\includegraphics{res/znak_vzor.png} \\[2cm]
+	\huge{Vizualizace grafu matematické funkce} \\[2cm]
+	\Large{Tomáš Maršálek} \\
+	\large{marsalet@students.zcu.cz} \\[1cm]
+	\normalsize{\today}
+\end{center}
+\end{titlepage}
 
 \section{Zadání}
 Naprogramujte v ANSI C přenositelnou1 konzolovou aplikaci, která jako vstup
@@ -124,8 +134,8 @@ došlo k příliš velkému skoku ve sklonu dvou sousedních úseček (výpočet
 druhá diference přesahovala jistý zvolený práh), rozdělíme interval mezi $x_i$
 a $x_{i + 1}$ na polovinu. Samozřejmě musíme mít nějaký limit tohoto půlení,
 protože u funkcí typu $f(x) = sin(1/x)$ by došlo kolem nuly k nekonečnému
-půlení. Stejným výpočtem se snažíme zajistit co nejdelší interval, abychom
-zbytečně neplýtvali úsečkami. 
+půlení. Stejným výpočtem se snažíme zajistit co nejdelší interval, aby nedošlo
+ke zbytečnému plýtvání.
 
 \begin{figure}[ht!]
 \centering
@@ -147,17 +157,24 @@ celkem jednoduchý. Aby nedošlo k useklým grafům poblíž dolní nebo horní
 hranice, stačí vypočítat průsečík horní nebo dolní hranice s úsečkou mezi
 posledním bodem a bodem, který už by byl mimo graf a vést kratší úsečku do
 tohoto průsečíku. 
+\begin{figure}[ht!]
+\centering
+	\includegraphics[width=11cm]{figures/boundary.eps}
+	\caption{Zamezení úniku grafu mimo hranice}
+\end{figure}
 
-Horší jsou funkce, které nejsou definovány v určitém místě. Implementace
-těchto funkcí v matematické knihovně v takových případech vracejí hodnotu NaN.
-Výpočet průsečíku s takovým číslem nedává smysl a předefinování knihovních
-funkcí na vlastní, které by vracely alespoň nekonečna namísto NaN způsobuje
-jiné nežádoucí artefakty. Například předefinování logaritmů pro záporné hodnoty
-na záporné nekonečno funguje dokud nezobrazíme nějakou transformaci tohoto
-logaritmu na reálné hodnoty (např. $f(x) = exp(ln(x))$). Pro jednoduchost je
+Horší jsou funkce, které nejsou definovány v určitém místě. V některých
+případech dochází k nežádoucímu vynechání počáteční nebo konečné části grafu.
+Příkladem je jakýkoliv logaritmus, při rozdělení osy x, které vynechá bod $x =
+0.0$ dojde k vynechání první úsečky. Ta pak vzhledem k velkému sklonu logaritmu
+v tomto místě viditelně schází. Implementace funkcí s nenadefinovanými úseky v
+matematické knihovně v takových případech vracejí hodnotu NaN. Výpočet
+průsečíku s takovým číslem nedává smysl a předefinování knihovních funkcí na
+vlastní, které by vracely alespoň nekonečna namísto NaN způsobuje jiné
+nežádoucí artefakty. Například předefinování logaritmů pro záporné hodnoty na
+záporné nekonečno funguje dokud nezobrazíme nějakou transformaci tohoto
+logaritmu na reálné hodnoty (např. $f(x) = \exp(\ln(x))$). Pro jednoduchost je
 tedy možná lepší NaN hodnoty pouze nezobrazovat.
-
-%% TODO nekonecno figure
 
 
 \section{Implementace}
@@ -183,7 +200,8 @@ kódu.
 
 Pomocnou datovou strukturu zde tvoří pouze zásobník, který se využívá při
 Shunting yard algoritmu a poté při kontrolním průchodu výsledným postfixovým
-výrazem, kdy se potvrdí, že výraz bude skutečně možné vyhodnotit. Zde se odstraní chyby související s n-aritou operátorů.
+výrazem, kdy se potvrdí, že výraz bude skutečně možné vyhodnotit. Zde se
+odstraní chyby související s n-aritou operátorů.
 
 \paragraph{Zobrazení grafu}
 je zajištěno dalším odděleným modulem. Ten nejprve zkonstruuje hlavičku
@@ -200,10 +218,21 @@ krát mocnina deseti.
 
 Nakonec jsou zapsány závěrečné postscriptové komentáře a soubor je uzavřen.
 
-
 Volitelný parametr popisující defiční obor a obor hodnot je analyzován stejným
 lexerem, ale má vlastní parsovací funkci.
 
+\section{Uživatelská příručka}
+Překlad ze zdrojových kódů provedeme pomocí příkazu make v kořenovém adresáři.
+Program spustíme spuštěním souboru graph.exe s parametry funkce, výstupní
+soubor a volitelně rozsah osy x a y, jak je naznačeno v usage stringu programu:
+\begin{verbatim}
+usage: graph.exe FUNCTION FILE.ps [LIMITS]
+\end{verbatim}
+%% TODO usage string
 
 \section{Závěr}
+Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze 3. Formát
+stránky je landscape letter, stejně jako grafy vygenerované pomocí GNU R, podle
+kterého jsem získal inspiraci pro vzhled grafů.
+
 \end{document}
