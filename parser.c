@@ -18,7 +18,7 @@
 /* stack holding symbol objects. Serves as data structure for shunting yard
  * and for blind evaluation.
  */
-static symbol ** stack;
+static symbol **stack;
 /* stack pointer */
 static int sp = 0;
 
@@ -32,8 +32,8 @@ static int sp = 0;
  * Deallocation of every used object is then performed by simply 
  * running through these and deallocating each element.
  */
-static token ** tokens;
-static symbol ** symbols;
+static token **tokens;
+static symbol **symbols;
 
 /* token and symbol counts */
 static int num_tok = 0;
@@ -43,10 +43,10 @@ static int num_sym = 0;
 /* initialize parser, that is allocate stack and helper data structures */
 void parser_init(int size)
 {
-    stack   = (symbol**) calloc(size, sizeof(symbol*));
-    symbols = (symbol**) calloc(size, sizeof(symbol*));
+    stack = (symbol **) calloc(size, sizeof(symbol *));
+    symbols = (symbol **) calloc(size, sizeof(symbol *));
     /* eof token => size + 1 */
-    tokens  = (token**)  calloc(size + 1, sizeof(token*));
+    tokens = (token **) calloc(size + 1, sizeof(token *));
 }
 
 
@@ -76,9 +76,9 @@ void dispose(parsed_expr p)
 /* Prints error message pointing to position of error that occured.
  * Returns empty expression to indicate failure 
  */
-parsed_expr parse_error(token * tok, const char * error_msg)
+parsed_expr parse_error(token * tok, const char *error_msg)
 {
-    parsed_expr error_expr = {0, NULL};
+    parsed_expr error_expr = { 0, NULL };
     fprintf(stderr, "%s: %s\n", error_msg, tok->context);
     fprintf(stderr, "%*s^\n", (int) strlen(error_msg) + 2 + tok->pos, "");
 
@@ -87,12 +87,12 @@ parsed_expr parse_error(token * tok, const char * error_msg)
 
 
 /* Helper function for creating empty symbols */
-symbol * make_symbol(int type, token * tok, double number)
+symbol *make_symbol(int type, token * tok, double number)
 {
-    symbol * sym = (symbol*) malloc(sizeof(symbol));
+    symbol *sym = (symbol *) malloc(sizeof(symbol));
 
-    sym->type   = type;
-    sym->tok    = tok;
+    sym->type = type;
+    sym->tok = tok;
     sym->number = number;
 
     symbols[num_sym++] = sym;
@@ -110,7 +110,7 @@ parsed_expr check(int length, symbol ** queue)
 
     int i, qp = 0;
     symbol *sym, *tmp;
-    symbol ** output = (symbol**) calloc(length, sizeof(symbol*));
+    symbol **output = (symbol **) calloc(length, sizeof(symbol *));
 #define ENQUEUE(x) output[qp++] = (x)
 
 #define EVAL_ERROR(msg) { \
@@ -133,7 +133,7 @@ parsed_expr check(int length, symbol ** queue)
 
             if (sym->op.binary) {
                 if (sp <= 0)
-                    EVAL_ERROR("Missing second operand"); 
+                    EVAL_ERROR("Missing second operand");
 
                 tmp = POP();
                 if (tmp->type != NUM && tmp->type != VAR)
@@ -159,7 +159,7 @@ parsed_expr check(int length, symbol ** queue)
     free(queue);
 
     result.length = length;
-    result.expr   = output;
+    result.expr = output;
     return result;
 }
 
@@ -171,33 +171,33 @@ parsed_expr check(int length, symbol ** queue)
  * String expression is tokenized first and then the infix order of symbols
  * is converted to postfix using stack data structure.
  */
-parsed_expr parse (char * expr)
+parsed_expr parse(char *expr)
 {
     int expr_len = strlen(expr);
     int qp = 0;
     /* init queue */
-    symbol ** queue = (symbol**) calloc(expr_len, sizeof(symbol*));
+    symbol **queue = (symbol **) calloc(expr_len, sizeof(symbol *));
 #define ENQUEUE(x) queue[qp++] = (x)
 
     int i = 0, eof = 0, last = T_LPAREN;
     double number;
     char *tmp;
     symbol *sym;
-    token * t;
+    token *t;
 
 
     /* init stack and trash data structures */
     parser_init(expr_len);
 
 
-	/* Draw a token, give it a semantic meaning 
+    /* Draw a token, give it a semantic meaning 
      * and perform shunting yard operations on it.
      */
     do {
         t = next_tok(expr, i);
         tokens[num_tok++] = t;
 
-        tmp = (char*) malloc(sizeof(char) * (t->len + 1));
+        tmp = (char *) malloc(sizeof(char) * (t->len + 1));
         strncpy(tmp, expr + t->pos, t->len);
         tmp[t->len] = '\0';
 
@@ -214,116 +214,116 @@ parsed_expr parse (char * expr)
                     (x) == T_DEC || (x) == T_FLOAT)
 
         switch (t->type) {
-            case T_HEX:
-            case T_DEC:
-            case T_OCT:
-                if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
-                    SYNTAX_ERROR();
+        case T_HEX:
+        case T_DEC:
+        case T_OCT:
+            if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
+                SYNTAX_ERROR();
 
-                number = (double) strtoul(tmp, NULL, 0);
-                sym = make_symbol(NUM, t, number);
-                ENQUEUE(sym);
-                break;
+            number = (double) strtoul(tmp, NULL, 0);
+            sym = make_symbol(NUM, t, number);
+            ENQUEUE(sym);
+            break;
 
-            case T_FLOAT:
-                if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
-                    SYNTAX_ERROR();
+        case T_FLOAT:
+            if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
+                SYNTAX_ERROR();
 
-                number = (double) strtod(tmp, NULL);
-                sym = make_symbol(NUM, t, number);
-                ENQUEUE(sym);
-                break;
+            number = (double) strtod(tmp, NULL);
+            sym = make_symbol(NUM, t, number);
+            ENQUEUE(sym);
+            break;
 
-            case T_VAR:
-                if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
-                    SYNTAX_ERROR();
+        case T_VAR:
+            if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
+                SYNTAX_ERROR();
 
-                sym = make_symbol(VAR, t, 0);
-                ENQUEUE(sym);
-                break;
+            sym = make_symbol(VAR, t, 0);
+            ENQUEUE(sym);
+            break;
 
-            case T_FUN:
-                if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
-                    SYNTAX_ERROR();
+        case T_FUN:
+            if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
+                SYNTAX_ERROR();
 
-                sym = make_symbol(OP, t, 0);
-                sym->op = match_fun(tmp);
-                PUSH(sym);
-                break;
+            sym = make_symbol(OP, t, 0);
+            sym->op = match_fun(tmp);
+            PUSH(sym);
+            break;
 
-            case T_OP:
-                if (last == T_FUN)
-                    SYNTAX_ERROR();
+        case T_OP:
+            if (last == T_FUN)
+                SYNTAX_ERROR();
 
-                sym = make_symbol(OP, t, 0);
-                sym->op = match_operator(tmp[0], last);
+            sym = make_symbol(OP, t, 0);
+            sym->op = match_operator(tmp[0], last);
 
-                /* exclude unary minus */
-                if (sym->op.binary && (last == T_OP || last == T_LPAREN))
-                    SYNTAX_ERROR();
+            /* exclude unary minus */
+            if (sym->op.binary && (last == T_OP || last == T_LPAREN))
+                SYNTAX_ERROR();
 
 
-                while (sp > 0 && PEEK()->type == OP) {
-                    if (PEEK()->op.assoc == LEFT && 
-                            PEEK()->op.prec >= sym->op.prec)
-                        ENQUEUE(POP());
-                    else if (PEEK()->op.assoc == RIGHT && 
-                            PEEK()->op.prec > sym->op.prec)
-                        ENQUEUE(POP());
-                    else
-                        break;
-                }
-
-                PUSH(sym);
-                break;
-
-            case T_LPAREN:
-                if (NUMERIC(last) || last == T_RPAREN)
-                    SYNTAX_ERROR();
-
-                sym = make_symbol(LPAREN, t, 0);
-                PUSH(sym);
-                break;
-
-            case T_RPAREN:
-                if (last == T_OP || last == T_FUN)
-                    SYNTAX_ERROR();
-                if (last == T_LPAREN) {
-                    free(queue);
-                    free(tmp);
-                    return parse_error(t, "Empty subexpression");
-                }
-
-                while (sp > 0 && PEEK()->type != LPAREN)
+            while (sp > 0 && PEEK()->type == OP) {
+                if (PEEK()->op.assoc == LEFT &&
+                    PEEK()->op.prec >= sym->op.prec)
                     ENQUEUE(POP());
+                else if (PEEK()->op.assoc == RIGHT &&
+                         PEEK()->op.prec > sym->op.prec)
+                    ENQUEUE(POP());
+                else
+                    break;
+            }
 
-                if (sp == 0) {
-                    free(queue);
-                    free(tmp);
-                    return parse_error(t, "Missing parenthesis");
-                }
+            PUSH(sym);
+            break;
 
-                sym = POP();
-                break;
+        case T_LPAREN:
+            if (NUMERIC(last) || last == T_RPAREN)
+                SYNTAX_ERROR();
 
-			/* Colon is never used here, its purpose is as separator in 
-             * 'limits' string. Treat is as an error. */
-            case T_COLON:
-            case T_ERROR:
+            sym = make_symbol(LPAREN, t, 0);
+            PUSH(sym);
+            break;
+
+        case T_RPAREN:
+            if (last == T_OP || last == T_FUN)
+                SYNTAX_ERROR();
+            if (last == T_LPAREN) {
                 free(queue);
                 free(tmp);
-                return parse_error(t, "Unknown symbol");
+                return parse_error(t, "Empty subexpression");
+            }
 
-			/* Ignore all whitespaces. */
-            case T_SPACE:
-                i += t->len;
+            while (sp > 0 && PEEK()->type != LPAREN)
+                ENQUEUE(POP());
+
+            if (sp == 0) {
+                free(queue);
                 free(tmp);
-                continue;
+                return parse_error(t, "Missing parenthesis");
+            }
 
-			/* Break out of loop if done. */
-            case T_EOF:
-                eof = 1;
-                break;
+            sym = POP();
+            break;
+
+            /* Colon is never used here, its purpose is as separator in 
+             * 'limits' string. Treat is as an error. */
+        case T_COLON:
+        case T_ERROR:
+            free(queue);
+            free(tmp);
+            return parse_error(t, "Unknown symbol");
+
+            /* Ignore all whitespaces. */
+        case T_SPACE:
+            i += t->len;
+            free(tmp);
+            continue;
+
+            /* Break out of loop if done. */
+        case T_EOF:
+            eof = 1;
+            break;
         }
 
         i += t->len;

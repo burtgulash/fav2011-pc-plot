@@ -12,10 +12,10 @@
  * Parses string containing encoded plot limits and writes then to 'limits' 
  * returns 1 on success, 0 if parse error.
  */
-int parse_limits(Limits * limits, char * lim_string)
+int parse_limits(Limits * limits, char *lim_string)
 {
-    token * tok;
-    char * tmp;
+    token *tok;
+    char *tmp;
     int i, lim_pos = 0, sign = 1;
 
     if (!limits)
@@ -42,24 +42,25 @@ int parse_limits(Limits * limits, char * lim_string)
             tok = next_tok(lim_string, lim_pos);
         }
 
-        tmp = (char*) malloc(sizeof(char) * (tok->len + 1));
+        tmp = (char *) malloc(sizeof(char) * (tok->len + 1));
         strncpy(tmp, lim_string + tok->pos, tok->len);
         tmp[tok->len] = '\0';
 
-        switch(tok->type) {
-            case T_HEX: case T_DEC: case T_OCT:
-                *((double*) limits + i) = 
-                            sign * (double) strtoul(tmp, NULL, 0);
-                break;
-            case T_FLOAT:
-                *((double*) limits + i) = 
-                            sign * (double) strtod(tmp, NULL);
-                break;
-            default:
-                (void) parse_error(tok, "Number expected");
-                free(tmp);
-                free(tok);
-                return 0;
+        switch (tok->type) {
+        case T_HEX:
+        case T_DEC:
+        case T_OCT:
+            *((double *) limits + i) =
+                sign * (double) strtoul(tmp, NULL, 0);
+            break;
+        case T_FLOAT:
+            *((double *) limits + i) = sign * (double) strtod(tmp, NULL);
+            break;
+        default:
+            (void) parse_error(tok, "Number expected");
+            free(tmp);
+            free(tok);
+            return 0;
         }
         lim_pos += tok->len;
         free(tmp);
@@ -76,7 +77,7 @@ int parse_limits(Limits * limits, char * lim_string)
     free(tok);
 
 
-	/* Perform check on limits, do not allow reversed x-axis */
+    /* Perform check on limits, do not allow reversed x-axis */
     if (limits->x_low >= limits->x_high || limits->y_low >= limits->y_high) {
         fprintf(stderr, "Low limit must be less than high limit\n");
         return 0;
@@ -90,56 +91,56 @@ int parse_limits(Limits * limits, char * lim_string)
  * and write a valid postscript file on success.
  * Returns to OS with exit code indicating success or failure.
  */
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
     parsed_expr parsed;
-    FILE * plot_file;
-    Limits * lims;
+    FILE *plot_file;
+    Limits *lims;
     int exit_code = EXIT_SUCCESS;
 
-	/* if argument count is not valid, fail immediately */
+    /* if argument count is not valid, fail immediately */
     if (argc == 3 || argc == 4) {
-		/* parse function expression */
+        /* parse function expression */
         parsed = parse(argv[1]);
-		/* parsing error is indicated by null expression */
+        /* parsing error is indicated by null expression */
         if (parsed.expr != NULL) {
-			/* check if argument 'limits' was provided */
-			if (argc == 3) {
-				plot_file = fopen(argv[2], "w");
-				if (plot_file != NULL) {
-					write_ps(plot_file, parsed, argv[1], NULL);
-					fclose(plot_file);
-				} else {
-					perror (FILE_OPENING_ERROR);
-					exit_code = EXIT_FAILURE;
-				}
-			} else {
-				/* try to parse limits */
-				lims = (Limits*) malloc(sizeof(Limits));            
-				if (parse_limits(lims, argv[3])) {
-					plot_file = fopen(argv[2], "w");
-					if (plot_file != NULL) {
-						write_ps(plot_file, parsed, argv[1], lims);
-						fclose(plot_file);
-					} else {
-						perror (FILE_OPENING_ERROR);
-						exit_code = EXIT_FAILURE;
-					}
-				} else
-					exit_code = EXIT_FAILURE;
-				free(lims);
-			}
+            /* check if argument 'limits' was provided */
+            if (argc == 3) {
+                plot_file = fopen(argv[2], "w");
+                if (plot_file != NULL) {
+                    write_ps(plot_file, parsed, argv[1], NULL);
+                    fclose(plot_file);
+                } else {
+                    perror(FILE_OPENING_ERROR);
+                    exit_code = EXIT_FAILURE;
+                }
+            } else {
+                /* try to parse limits */
+                lims = (Limits *) malloc(sizeof(Limits));
+                if (parse_limits(lims, argv[3])) {
+                    plot_file = fopen(argv[2], "w");
+                    if (plot_file != NULL) {
+                        write_ps(plot_file, parsed, argv[1], lims);
+                        fclose(plot_file);
+                    } else {
+                        perror(FILE_OPENING_ERROR);
+                        exit_code = EXIT_FAILURE;
+                    }
+                } else
+                    exit_code = EXIT_FAILURE;
+                free(lims);
+            }
         } else
             exit_code = EXIT_FAILURE;
 
-		/* deallocate all memory held by parsed expression */
+        /* deallocate all memory held by parsed expression */
         dispose(parsed);
     } else
         exit_code = EXIT_FAILURE;
 
-	/* print usage string in case of any error */
-	if (exit_code == EXIT_FAILURE)
-		fprintf(stderr, USAGE);
+    /* print usage string in case of any error */
+    if (exit_code == EXIT_FAILURE)
+        fprintf(stderr, USAGE);
 
     return exit_code;
 }

@@ -12,14 +12,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h> /* for fabs() */
+#include <math.h>               /* for fabs() */
 #include "parser.h"
 #include "plot.h"
 
 /** SMOOTHING PARAMETERS **/
 #define PLOT_COLOR "0 0.4 0.9"
 /* higher -> more postscript lines, but smoother */
-#define SMOOTHNESS 3000 
+#define SMOOTHNESS 3000
 /* higher -> less postscript lines, but slower and occasionally will fail
    on smooth-then-dense plots (eg. sin(1/x^60) from -10 to 10) */
 #define MAX_SMOOTHNESS_LVL 4
@@ -38,7 +38,7 @@
 
 
 /** STACK for evaluating parsed expression and stack pointer **/
-static double * stack;
+static double *stack;
 static int sp = 0;
 
 #define PUSH(x) stack[sp++] = (x)
@@ -72,22 +72,22 @@ double evaluate(parsed_expr p, double x)
         sym = p.expr[i];
 
         switch (sym->type) {
-            case OP:
-                a = POP();
-                if (sym->op.binary) {
-                    b = POP();
-                    PUSH((sym->op.eval)(b, a));
-                } else
-                    PUSH((sym->op.eval)(a, 0));
-                break;
+        case OP:
+            a = POP();
+            if (sym->op.binary) {
+                b = POP();
+                PUSH((sym->op.eval) (b, a));
+            } else
+                PUSH((sym->op.eval) (a, 0));
+            break;
 
-            case NUM:
-                PUSH(sym->number);
-                break;
+        case NUM:
+            PUSH(sym->number);
+            break;
 
-            case VAR:
-                PUSH(x);
-                break;
+        case VAR:
+            PUSH(x);
+            break;
         }
     }
 
@@ -99,17 +99,17 @@ double evaluate(parsed_expr p, double x)
 int plot_init(int size, Limits * lims)
 {
     if (lims) {
-        x_low  = lims->x_low;
+        x_low = lims->x_low;
         x_high = lims->x_high;
-        y_low   = lims->y_low;
-        y_high  = lims->y_high;
+        y_low = lims->y_low;
+        y_high = lims->y_high;
     }
 
-    stack = (double*) calloc(size, sizeof(double));
+    stack = (double *) calloc(size, sizeof(double));
     sp = 0;
 
-    scale_x = (URX - LLX - 2*BLANK) / (x_high - x_low);
-    scale_y = (URY - LLY - 2*BLANK) / (y_high - y_low);
+    scale_x = (URX - LLX - 2 * BLANK) / (x_high - x_low);
+    scale_y = (URY - LLY - 2 * BLANK) / (y_high - y_low);
     return 1;
 }
 
@@ -144,9 +144,9 @@ static void plot(FILE * out, parsed_expr p)
 #define COORD_Y(y) (((y) - y_low) * scale_y + LLY + BLANK)
 
 #define LINETO(x, y) fprintf(out, "%.3f %.3f lineto\n", \
-                             COORD_X(x), COORD_Y(y)) 
+                             COORD_X(x), COORD_Y(y))
 #define MOVETO(x, y) fprintf(out, "%.3f %.3f moveto\n", \
-                             COORD_X(x), COORD_Y(y)) 
+                             COORD_X(x), COORD_Y(y))
 
 /* find intersection with y-boundary */
 #define INTERSECT(boundary) (x_1 + ((boundary) - y_1) * \
@@ -159,7 +159,7 @@ static void plot(FILE * out, parsed_expr p)
     else
         last_out = 0;
 
-	/* New path exclusively for function plot */
+    /* New path exclusively for function plot */
     fprintf(out, "newpath\n");
     if (!IS_NAN(y_1))
         MOVETO(x_1, y_1);
@@ -224,21 +224,21 @@ static void plot(FILE * out, parsed_expr p)
         y_1 = y_2;
         x_2 = x_1 + delta;
         y_2 = evaluate(p, x_2);
-		/* if plot is too sharp or too smooth, find appropriate smoothness lvl 
+        /* if plot is too sharp or too smooth, find appropriate smoothness lvl 
          */
         if (TOO_SHARP()) {
             while (SMOOTHNESS_LVL < MAX_SMOOTHNESS_LVL && TOO_SHARP()) {
                 delta /= 2;
                 x_2 = x_1 + delta;
                 y_2 = evaluate(p, x_2);
-                SMOOTHNESS_LVL ++;
+                SMOOTHNESS_LVL++;
             }
         } else {
             while (SMOOTHNESS_LVL > 0 && TOO_SMOOTH()) {
                 delta *= 2;
                 x_2 = x_1 + delta;
                 y_2 = evaluate(p, x_2);
-                SMOOTHNESS_LVL --;
+                SMOOTHNESS_LVL--;
             }
         }
 
@@ -257,11 +257,11 @@ static void plot(FILE * out, parsed_expr p)
 
 
 /* Write valid postscript header */
-static void write_header(FILE * out, char * expression)
+static void write_header(FILE * out, char *expression)
 {
     fprintf(out, "%%!PS-Adobe-3.0 EPSF-3.0\n");
-    fprintf(out, "%%%%DocumentMedia: Letter %d %d 0 () ()\n", 
-                                                  LLX + URX, LLY + URY);
+    fprintf(out, "%%%%DocumentMedia: Letter %d %d 0 () ()\n",
+            LLX + URX, LLY + URY);
     fprintf(out, "%%%%Title: Plot %s\n", expression);
     fprintf(out, "%%%%Creator: Plot utility\n");
     fprintf(out, "%%%%Pages: 1\n");
@@ -276,7 +276,7 @@ static void write_header(FILE * out, char * expression)
 /* length of plot label line in standard postscript units */
 #define LINE_LEN  8
 
-static void write_axis_units(FILE * out, int horizontal) 
+static void write_axis_units(FILE * out, int horizontal)
 {
     double size;
     double axis_scale;
@@ -288,11 +288,11 @@ static void write_axis_units(FILE * out, int horizontal)
     /* x axis */
     if (horizontal)
         size = x_high - x_low;
-	/* y axis */
-    else 
+    /* y axis */
+    else
         size = y_high - y_low;
 
-	/* find scale of corresponding axis */
+    /* find scale of corresponding axis */
     power = ceil(log10(size / (MAX_UNITS - 1)) - 1);
     if (size / (2 * pow(10, power)) < (MAX_UNITS - 1))
         axis_scale = 2;
@@ -300,7 +300,7 @@ static void write_axis_units(FILE * out, int horizontal)
         axis_scale = 5;
     else {
         axis_scale = 1;
-        power ++;
+        power++;
     }
 
     unit_size = axis_scale * pow(10, power);
@@ -315,17 +315,17 @@ static void write_axis_units(FILE * out, int horizontal)
     }
 
     if (power < 0)
-        print_precision = - (int) power;
+        print_precision = -(int) power;
 
 
     fprintf(out, "newpath\n");
 
-	/* branch on x or y axis */
+    /* branch on x or y axis */
     if (horizontal) {
         do {
             MOVETO(unit_position, y_low);
             fprintf(out, "%d %d rlineto\n", 0, -LINE_LEN);
-            fprintf(out, "%d %d rmoveto\n", 0, - 2 * LINE_LEN);
+            fprintf(out, "%d %d rmoveto\n", 0, -2 * LINE_LEN);
             fprintf(out, "(%.*f) show\n", print_precision, unit_position);
 
             unit_position += unit_size;
@@ -334,7 +334,7 @@ static void write_axis_units(FILE * out, int horizontal)
         do {
             MOVETO(x_low, unit_position);
             fprintf(out, "%d %d rlineto\n", -LINE_LEN, 0);
-            fprintf(out, "%d %d rmoveto\n", - 2 * LINE_LEN, 0);
+            fprintf(out, "%d %d rmoveto\n", -2 * LINE_LEN, 0);
             fprintf(out, "90 rotate\n");
             fprintf(out, "(%.*f) show\n", print_precision, unit_position);
             fprintf(out, "-90 rotate\n");
@@ -344,7 +344,7 @@ static void write_axis_units(FILE * out, int horizontal)
     }
 
 
-	/* stroke all plot labels */
+    /* stroke all plot labels */
     fprintf(out, "0 setgray\n");
     fprintf(out, "0.4 setlinewidth\n");
     fprintf(out, "stroke\n\n");
@@ -381,7 +381,7 @@ static void write_footer(FILE * out)
 
 
 /* plot parsed expression and write it to postscript file */
-void write_ps(FILE * out, parsed_expr parsed, char * expr, Limits * lim)
+void write_ps(FILE * out, parsed_expr parsed, char *expr, Limits * lim)
 {
     plot_init(parsed.length, lim);
 
