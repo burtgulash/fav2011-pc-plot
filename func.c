@@ -1,3 +1,9 @@
+/*
+ * func.c
+ * Provides wrappers for math functions and utility functions for creating 
+ * operator symbols.
+*/
+
 #include <assert.h>
 #include <math.h>
 #include <float.h>
@@ -7,11 +13,13 @@
 
 #define IS_NAN(x) ((x) != (x))
 
+/* list of all functions that can be used in expression */
 char * functions[NUM_F] = {"abs", "exp", "ln", "log",
                            "sin", "cos", "tan", 
                            "asin", "acos", "atan",
                            "sinh", "cosh", "tanh"};
 
+/* function wrappers. */
 double add(double a, double b) { return a + b; }
 double neg(double a, double b) { return -a; }
 double sub(double a, double b) { return a - b; }
@@ -19,6 +27,7 @@ double mul(double a, double b) { return a * b; }
 double div(double a, double b) { return a / b; }
 double Pow(double a, double b) { return pow(a, b); }
 
+/* unary functions are made binary with the second argument dead */
 double Abs(double a, double b) { return fabs(a); }
 double Exp(double a, double b) { return exp(a); }
 double Ln(double a, double b) { return log(a); }
@@ -37,6 +46,9 @@ double Cosh(double a, double b) { return cosh(a); }
 double Tanh(double a, double b) { return tanh(a); }
 
 
+/* Creates Operator symbol from character c. 
+ * 'last' token is used to detect unary minus.
+ */
 Operator match_operator(char c, int last)
 {
     Operator op;
@@ -46,6 +58,7 @@ Operator match_operator(char c, int last)
 
     switch (c) {
         case '-':
+			/* find n-arity of minus operator */
             if (last == T_LPAREN || last == T_OP) {
                 op.prec   = 4;
                 op.assoc  = RIGHT;
@@ -76,10 +89,13 @@ Operator match_operator(char c, int last)
     }
 
     assert (op.eval);
-
     return op;
 }
 
+
+/* Create Operator symbol given valid function string.
+ * String checking should already be performed by lexer.
+ */
 Operator match_fun(char * fun_str)
 {
     Operator op;
@@ -115,8 +131,8 @@ Operator match_fun(char * fun_str)
     else if (strcmp(fun_str, "tanh") == 0)
         op.eval = Tanh;
 
+	/* fail if string was not matched */
     assert(op.eval);
-
     return op;
 }
 

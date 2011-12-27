@@ -1,3 +1,11 @@
+/*
+ * lexer.c
+ *
+ * Lexical analyzer for function and limits string expressions.
+ * Scans through expressions and returns valid or error tokens
+ * by function next_tok. End of file is returned after the expression
+ * is depleted.
+ */
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -7,10 +15,13 @@
 #define isoctal(c) ('0' <= (c) && (c) < '8')
 
 extern char * functions[NUM_F];
+/* name of variable to be expected in expression string */
 char * var_literal = "x";
 
-
+/* all valid operators */
 static char * operators = "+-*/^";
+
+/* function to check if character is operator */
 static int isoperator(char c) 
 {
     int i;
@@ -20,12 +31,14 @@ static int isoperator(char c)
     return 0;
 }
 
-/* lexer states */
+/* lexer DFA states */
 enum {ZERO, DOT, FRAC, DEC, XX, EE, OCT, HEX, EXP, EXP_SIGN, 
       DEC_MATCHED, OCT_MATCHED, HEX_MATCHED, FLOAT_MATCHED};
 
 
-/* construct a token */
+/* construct a token with given type, position in input expression (context)
+ * and length of token
+*/
 static token * make_tok(int type, int pos, int len, char * context)
 {
     token * tok = (token*) malloc(sizeof(token));
@@ -39,14 +52,20 @@ static token * make_tok(int type, int pos, int len, char * context)
 }
 
 
+/*
+ * Returns token found in expression 'expr' on 'i'-th position.
+ * Possible types of tokens are specified in enum in lexer.h
+ */
 token * next_tok(char * expr, int i)
 {
     char c = expr[i];
     int f, f_len, len, var_len, state;
 
+	/* detect end of string */
     if (c == '\0')
         return make_tok(T_EOF, i, 1, expr);
 
+	/* trivial tokens, no need to use DFA */
     if (c == '(') {
         return make_tok(T_LPAREN, i, 1, expr);
     } else if (c == ')') {
@@ -60,22 +79,32 @@ token * next_tok(char * expr, int i)
         while (isspace(expr[i + len]))
             len++;
         return make_tok(T_SPACE, i, len, expr);
+	/* 
+     * alphabetic characters can result in 'variable' or 'function' token.
+     */
     } else if (isalpha(c)) {
         len = 1;
         while (isalpha(expr[i + len]))
             len++;
 
+		/* check if token is variable */
         var_len = strlen(var_literal);
         if (len == var_len && strncmp(expr + i, var_literal, var_len) == 0)
             return make_tok(T_VAR, i, len, expr);
 
+		/* check if token matches one of the valid math functions */
         for (f = 0; f < NUM_F; f++) {
             f_len = strlen(functions[f]);
             if (len == f_len && strncmp(expr + i, functions[f], f_len) == 0)
                 return make_tok(T_FUN, i, len, expr);
         }
 
+		/* else return error token */
         return make_tok(T_ERROR, i, len, expr);
+
+	/* numbers come in different flavours, DFA is created to match
+       hex, oct, decimal and floating point numbers 
+     */
     } else if (isdigit(c) || c == '.') {
         len = 0;
 
@@ -186,5 +215,6 @@ token * next_tok(char * expr, int i)
 #undef CURR
     }
 
+	/* failure to match any token should result in error */
     return make_tok(T_ERROR, i, 1, expr);
 }

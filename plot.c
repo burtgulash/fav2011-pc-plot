@@ -1,3 +1,15 @@
+/*
+ * plot.c
+ *
+ * This module takes care of actual plotting and writing postscript commands
+ * to output file.
+ *
+ * Plot parameters given by macros below specify smoothness and number 
+ * of lines in resulting plot. Tweaking those can result in plots
+ * with different smoothness properties.
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h> /* for fabs() */
@@ -11,7 +23,7 @@
 /* higher -> less postscript lines, but slower and occasionally will fail
    on smooth-then-dense plots (eg. sin(1/x^60) from -10 to 10) */
 #define MAX_SMOOTHNESS_LVL 4
-#define TRESHOLD .002
+#define THRESHOLD .002
 
 
 /** BOX PARAMETERS **/
@@ -21,10 +33,11 @@
 #define URY 594
 #define URX 774
 
+/* blank space left from each side of a page */
 #define BLANK 50
 
 
-/** STACK for evaluating parsed expression **/
+/** STACK for evaluating parsed expression and stack pointer **/
 static double * stack;
 static int sp = 0;
 
@@ -33,7 +46,7 @@ static int sp = 0;
 #define PEEK()  stack[sp - 1]
 
 
-/** PLOT x and y LIMITS **/
+/** PLOT x and y LIMITS. Initially set to range [-10, 10] **/
 static double x_low = -10;
 static double x_high = 10;
 static double y_low = -10;
@@ -42,10 +55,12 @@ static double y_high = 10;
 static double scale_x;
 static double scale_y;
 
-
+/* macro to detect if number is nan. x != x iff x is not a number. */
 #define IS_NAN(x) (x != x)
 
 
+/* Function that evaluates parsed expression in given point 'x'.
+ * 'x' is a number that is plugged for 'x' variable in expression */
 double evaluate(parsed_expr p, double x)
 {
     int i;
@@ -80,6 +95,7 @@ double evaluate(parsed_expr p, double x)
 }
 
 
+/* Sets all global variables with values that are known initially */
 int plot_init(int size, Limits * lims)
 {
     if (lims) {
@@ -99,6 +115,14 @@ int plot_init(int size, Limits * lims)
 
 
 
+/* Plotting procedure. 
+ * X-axis is segmented according to 'delta' distance, that is distance between
+ * consecutive x's (x_i to x_{i + 1} distance). Infinity and NaN checks are 
+ * performed and corresponding action is taken to prevent mess. 
+ * Infinity case is handled by computing intersect with plot-box. NaNs
+ * are not plotted at all.
+ * Adaptive smoothing is performed at the end of plot loop.
+ */
 static void plot(FILE * out, parsed_expr p)
 {
     double delta = (x_high - x_low) / SMOOTHNESS;
@@ -135,6 +159,7 @@ static void plot(FILE * out, parsed_expr p)
     else
         last_out = 0;
 
+	/* New path exclusively for function plot */
     fprintf(out, "newpath\n");
     if (!IS_NAN(y_1))
         MOVETO(x_1, y_1);
@@ -147,7 +172,6 @@ static void plot(FILE * out, parsed_expr p)
 
     /* plotting loop */
     while (x_2 <= x_high) {
-
         if (IS_NAN(y_2))
             last_nan = 1;
         else if (y_low <= y_2 && y_2 <= y_high) {
@@ -189,10 +213,10 @@ static void plot(FILE * out, parsed_expr p)
         }
 
 /** smoothing procedure **/
-/* SLOPE_JUMP <- second derivative */
+/* SLOPE_JUMP is numerically evaluated second derivative */
 #define SLOPE_JUMP (y_2 - y_1 - ((y_1 - old_y)*(x_2 - x_1))/(x_1 - old_x))
-#define TOO_SHARP() (fabs(SLOPE_JUMP) > TRESHOLD)
-#define TOO_SMOOTH() (fabs(SLOPE_JUMP) < TRESHOLD / 4)
+#define TOO_SHARP() (fabs(SLOPE_JUMP) > THRESHOLD)
+#define TOO_SMOOTH() (fabs(SLOPE_JUMP) < THRESHOLD / 4)
 
         old_x = x_1;
         old_y = y_1;
@@ -200,6 +224,8 @@ static void plot(FILE * out, parsed_expr p)
         y_1 = y_2;
         x_2 = x_1 + delta;
         y_2 = evaluate(p, x_2);
+		/* if plot is too sharp or too smooth, find appropriate smoothness lvl 
+         */
         if (TOO_SHARP()) {
             while (SMOOTHNESS_LVL < MAX_SMOOTHNESS_LVL && TOO_SHARP()) {
                 delta /= 2;
@@ -230,6 +256,7 @@ static void plot(FILE * out, parsed_expr p)
 }
 
 
+/* Write valid postscript header */
 static void write_header(FILE * out, char * expression)
 {
     fprintf(out, "%%!PS-Adobe-3.0 EPSF-3.0\n");
@@ -244,7 +271,9 @@ static void write_header(FILE * out, char * expression)
 }
 
 
-#define MAX_UNITS 7
+/* maximum number of plot labels */
+#define MAX_UNITS 8
+/* length of plot label line in standard postscript units */
 #define LINE_LEN  8
 
 static void write_axis_units(FILE * out, int horizontal) 
@@ -256,16 +285,18 @@ static void write_axis_units(FILE * out, int horizontal)
     double unit_position;
     int print_precision = 0;
 
-    /** x axis **/
+    /* x axis */
     if (horizontal)
         size = x_high - x_low;
+	/* y axis */
     else 
         size = y_high - y_low;
 
-    power = ceil(log10(size / MAX_UNITS) - 1);
-    if (size / (2 * pow(10, power)) < MAX_UNITS)
+	/* find scale of corresponding axis */
+    power = ceil(log10(size / (MAX_UNITS - 1)) - 1);
+    if (size / (2 * pow(10, power)) < (MAX_UNITS - 1))
         axis_scale = 2;
-    else if (size / (5 * pow(10, power)) < MAX_UNITS)
+    else if (size / (5 * pow(10, power)) < (MAX_UNITS - 1))
         axis_scale = 5;
     else {
         axis_scale = 1;
@@ -289,6 +320,7 @@ static void write_axis_units(FILE * out, int horizontal)
 
     fprintf(out, "newpath\n");
 
+	/* branch on x or y axis */
     if (horizontal) {
         do {
             MOVETO(unit_position, y_low);
@@ -312,13 +344,14 @@ static void write_axis_units(FILE * out, int horizontal)
     }
 
 
+	/* stroke all plot labels */
     fprintf(out, "0 setgray\n");
     fprintf(out, "0.4 setlinewidth\n");
     fprintf(out, "stroke\n\n");
 }
 
 
-/* Draws box around plot and units */
+/* Draws box around plot and plot labels */
 static void write_box(FILE * out)
 {
     fprintf(out, "newpath\n");

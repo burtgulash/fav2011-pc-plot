@@ -5,7 +5,8 @@
 #include "parser.h"
 #include "plot.h"
 
-#define USAGE "usage: graph.exe FUNCTION FILE [LIMITS]\n"
+#define USAGE "\nusage: graph.exe FUNCTION FILE [LIMITS]\n"
+#define FILE_OPENING_ERROR "error opening file\n"
 
 /* 
  * Parses string containing encoded plot limits and writes then to 'limits' 
@@ -75,7 +76,7 @@ int parse_limits(Limits * limits, char * lim_string)
     free(tok);
 
 
-
+	/* Perform check on limits, do not allow reversed x-axis */
     if (limits->x_low >= limits->x_high || limits->y_low >= limits->y_high) {
         fprintf(stderr, "Low limit must be less than high limit\n");
         return 0;
@@ -85,6 +86,10 @@ int parse_limits(Limits * limits, char * lim_string)
 }
 
 
+/* Tries to parse input parameters
+ * and write a valid postscript file on success.
+ * Returns to OS with exit code indicating success or failure.
+ */
 int main(int argc, char ** argv)
 {
     parsed_expr parsed;
@@ -92,34 +97,47 @@ int main(int argc, char ** argv)
     Limits * lims;
     int exit_code = EXIT_SUCCESS;
 
+	/* if argument count is not valid, fail immediately */
     if (argc == 3 || argc == 4) {
+		/* parse function expression */
         parsed = parse(argv[1]);
+		/* parsing error is indicated by null expression */
         if (parsed.expr != NULL) {
-            plot_file = fopen(argv[2], "w");
-            if (plot_file != NULL) {
-                if (argc == 3)
-                    write_ps(plot_file, parsed, argv[1], NULL);
-                else {
-                    lims = (Limits*) malloc(sizeof(Limits));            
-                    if(parse_limits(lims, argv[3]))
-                        write_ps(plot_file, parsed, argv[1], lims);
-                    else
-                        exit_code = EXIT_FAILURE;
-                    free(lims);
-                }
-
-                fclose(plot_file);
-            } else {
-                perror("Error opening file");
-                exit_code = EXIT_FAILURE;
-            }
+			/* check if argument 'limits' was provided */
+			if (argc == 3) {
+				plot_file = fopen(argv[2], "w");
+				if (plot_file != NULL) {
+					write_ps(plot_file, parsed, argv[1], NULL);
+					fclose(plot_file);
+				} else {
+					perror (FILE_OPENING_ERROR);
+					exit_code = EXIT_FAILURE;
+				}
+			} else {
+				/* try to parse limits */
+				lims = (Limits*) malloc(sizeof(Limits));            
+				if (parse_limits(lims, argv[3])) {
+					plot_file = fopen(argv[2], "w");
+					if (plot_file != NULL) {
+						write_ps(plot_file, parsed, argv[1], lims);
+						fclose(plot_file);
+					} else {
+						perror (FILE_OPENING_ERROR);
+						exit_code = EXIT_FAILURE;
+					}
+				} else
+					exit_code = EXIT_FAILURE;
+				free(lims);
+			}
         } else
             exit_code = EXIT_FAILURE;
 
+		/* deallocate all memory held by parsed expression */
         dispose(parsed);
     } else
         exit_code = EXIT_FAILURE;
 
+	/* print usage string in case of any error */
 	if (exit_code == EXIT_FAILURE)
 		fprintf(stderr, USAGE);
 

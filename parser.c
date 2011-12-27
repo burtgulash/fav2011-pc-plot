@@ -1,3 +1,12 @@
+/*
+ * parser.c
+ *
+ * Parser module. Implements Shunting yard algorithm to infix expression 
+ * to postfix. Before returning parsed postfix expression, a blind evaluation
+ * is performed on the result to detect remaining errors. Resulting 
+ * expression is thus guaranteed to be evaluable.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,30 +15,44 @@
 #include "parser.h"
 
 
+/* stack holding symbol objects. Serves as data structure for shunting yard
+ * and for blind evaluation.
+ */
 static symbol ** stack;
+/* stack pointer */
 static int sp = 0;
 
+/* stack operations for this stack */
 #define PUSH(x) stack[sp++] = (x)
 #define POP()   stack[--sp]
 #define PEEK()  stack[sp - 1]
 
 
+/* Helper data structures holding references to tokens and symbols.
+ * Deallocation of every used object is then performed by simply 
+ * running through these and deallocating each element.
+ */
 static token ** tokens;
 static symbol ** symbols;
+
+/* token and symbol counts */
 static int num_tok = 0;
 static int num_sym = 0;
 
 
-
+/* initialize parser, that is allocate stack and helper data structures */
 void parser_init(int size)
 {
     stack   = (symbol**) calloc(size, sizeof(symbol*));
     symbols = (symbol**) calloc(size, sizeof(symbol*));
-    /* eof token +1 */
+    /* eof token => size + 1 */
     tokens  = (token**)  calloc(size + 1, sizeof(token*));
 }
 
 
+/* deallocate all objects at once after parsed expression
+ * was successfuly plotted.
+ */
 void dispose(parsed_expr p)
 {
     int i;
@@ -50,7 +73,9 @@ void dispose(parsed_expr p)
     symbols = NULL;
 }
 
-
+/* Prints error message pointing to position of error that occured.
+ * Returns empty expression to indicate failure 
+ */
 parsed_expr parse_error(token * tok, const char * error_msg)
 {
     parsed_expr error_expr = {0, NULL};
@@ -61,6 +86,7 @@ parsed_expr parse_error(token * tok, const char * error_msg)
 }
 
 
+/* Helper function for creating empty symbols */
 symbol * make_symbol(int type, token * tok, double number)
 {
     symbol * sym = (symbol*) malloc(sizeof(symbol));
@@ -75,6 +101,9 @@ symbol * make_symbol(int type, token * tok, double number)
 }
 
 
+/* Blind evaluation, detects function n-arity errors and
+ * errors caused by wrong order of symbols. (consecutive numbers or operators)
+ */
 parsed_expr check(int length, symbol ** queue)
 {
     parsed_expr result;
@@ -135,6 +164,13 @@ parsed_expr check(int length, symbol ** queue)
 }
 
 
+/* Shunting yard implementation.
+ * Takes string representation of function and returns a list (queue)
+ * of symbols in postfix order.
+ *
+ * String expression is tokenized first and then the infix order of symbols
+ * is converted to postfix using stack data structure.
+ */
 parsed_expr parse (char * expr)
 {
     int expr_len = strlen(expr);
@@ -150,9 +186,13 @@ parsed_expr parse (char * expr)
     token * t;
 
 
-    /* init stack and trash */
+    /* init stack and trash data structures */
     parser_init(expr_len);
 
+
+	/* Draw a token, give it a semantic meaning 
+     * and perform shunting yard operations on it.
+     */
     do {
         t = next_tok(expr, i);
         tokens[num_tok++] = t;
@@ -162,12 +202,14 @@ parsed_expr parse (char * expr)
         tmp[t->len] = '\0';
 
 
+/* In case of syntax error, these steps are always the same */
 #define SYNTAX_ERROR() { \
                            free(queue); \
                            free(tmp); \
                            return parse_error(t, "Syntax error"); \
                        }
 
+/* Macro to detect if token is of numeric type */
 #define NUMERIC(x) ((x) == T_VAR || (x) == T_HEX || (x) == T_OCT || \
                     (x) == T_DEC || (x) == T_FLOAT)
 
@@ -264,17 +306,21 @@ parsed_expr parse (char * expr)
                 sym = POP();
                 break;
 
+			/* Colon is never used here, its purpose is as separator in 
+             * 'limits' string. Treat is as an error. */
             case T_COLON:
             case T_ERROR:
                 free(queue);
                 free(tmp);
                 return parse_error(t, "Unknown symbol");
 
+			/* Ignore all whitespaces. */
             case T_SPACE:
                 i += t->len;
                 free(tmp);
                 continue;
 
+			/* Break out of loop if done. */
             case T_EOF:
                 eof = 1;
                 break;
@@ -286,7 +332,7 @@ parsed_expr parse (char * expr)
         free(tmp);
     } while (!eof);
 
-    /* clear the stack */
+    /* Clear the stack of remaining symbols. */
     while (sp > 0) {
         if (PEEK()->type == LPAREN || PEEK()->type == RPAREN) {
             free(queue);
