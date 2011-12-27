@@ -228,11 +228,20 @@ soubor a volitelně rozsah osy x a y, jak je naznačeno v usage stringu programu
 \begin{verbatim}
 usage: graph.exe FUNCTION FILE.ps [LIMITS]
 \end{verbatim}
-%% TODO usage string
+Příklad použití:
+\begin{verbatim}
+graph.exe "sin(1/x^2)" vystup.ps 
+Do souboru vystup.ps je zapsán graf funkce
+sin(1/x^2) s vestavěným definičním oborem a oborem hodnot x, y \elem [-10, 10].
+graph.exe "sin(1/x^2)" vystup.ps -3:3:-2:2 
+Stejný příkaz, pouze použije jiný
+rozsah pro definiční obor (x \elem [-3, 3]) a obor hodnot (y \elem [-2, 2]).
+\end{verbatim}
 
 \section{Závěr}
 Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze 3. Formát
 stránky je landscape letter, stejně jako grafy vygenerované pomocí GNU R, podle
 kterého jsem získal inspiraci pro vzhled grafů.
+
 
 \end{document}
