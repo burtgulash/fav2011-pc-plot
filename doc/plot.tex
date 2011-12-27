@@ -100,7 +100,7 @@ Právě vytažený symbol pak pouze vložíme na zásobník. Až nám dojdou vš
 symboly, pouze vytáhneme všechny operátory ze zásobníku a v tomto pořadí je
 přidáme do výsledné fronty. \\
 
-Jako příklad mějme výraz 1 / 2~$\CARET$~3 + 4.
+Jako příklad použijme výraz 1 / 2~$\CARET$~3 + 4.
 \begin{center}
 \begin{tabular}{|c|l|l|r|}
 \hline
@@ -128,14 +128,17 @@ x, aby graf nebyl kostrbatý.
 vyhlazování. Šetření zobrazenými přímkami oceníme zejména u jednoduchých
 funkcí, protože rozhodně nepotřebujeme, aby graf funkce $f(x) = x$ byl stejně
 detailní jako graf funkce $f(x) = sin(1/x)$, který je kolem nuly velmi
-detailní. Taktika je poměrně jednoduchá.  Mějme zvolené nějaké počáteční
+detailní. Taktika je poměrně jednoduchá. Mějme zvolené nějaké počáteční
 rozdělení osy x a pokud při zobrazování jednotlivých úseček zjistíme, že by
 došlo k příliš velkému skoku ve sklonu dvou sousedních úseček (výpočetně by
-druhá diference přesahovala jistý zvolený práh), rozdělíme interval mezi $x_i$
+druhá derivace přesahovala jistý zvolený práh), rozdělíme interval mezi $x_i$
 a $x_{i + 1}$ na polovinu. Samozřejmě musíme mít nějaký limit tohoto půlení,
 protože u funkcí typu $f(x) = sin(1/x)$ by došlo kolem nuly k nekonečnému
 půlení. Stejným výpočtem se snažíme zajistit co nejdelší interval, aby nedošlo
-ke zbytečnému plýtvání.
+ke zbytečnému plýtvání. 
+
+Rozdělení osy x je o poznání hustší, pokud je graf v tomto místě detailnější,
+jak je vidět v porovnání dvou různých funkcí.
 
 \begin{figure}[ht!]
 \centering
@@ -225,6 +228,10 @@ lexerem, ale má vlastní parsovací funkci.
 Překlad ze zdrojových kódů provedeme pomocí příkazu make v kořenovém adresáři.
 Program spustíme spuštěním souboru graph.exe s parametry funkce, výstupní
 soubor a volitelně rozsah osy x a y, jak je naznačeno v usage stringu programu:
+Aritmetický výraz může obsahovat běžné binární operátory (+, -, *, /, \verb|^|)
+jednoduché závorky \uv{()}, proměnnou \uv{x}, a funkce implementované v knihovně math.h (). Konstanty můžou být zadány jako celá čísla v osmičkové, desítkové nebo šestnáctkové soustavě, nebo jako floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem C).
+% TOdo math.h function list
+
 \begin{verbatim}
 usage: graph.exe FUNCTION FILE.ps [LIMITS]
 \end{verbatim}
@@ -237,11 +244,10 @@ graph.exe "sin(1/x^2)" vystup.ps -3:3:-2:2
 Stejný příkaz, pouze použije jiný
 rozsah pro definiční obor (x \elem [-3, 3]) a obor hodnot (y \elem [-2, 2]).
 \end{verbatim}
+Rozsahy jsou jsou specifikovány dobrovolným parametrem, který má formát x1:x2:y1:y2, kde x1 a y1 musí být menší než x2, respektive y2. 
+Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze 3, může
+být použit přímo v typografickém nástroji \LaTeX.
 
 \section{Závěr}
-Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze 3. Formát
-stránky je landscape letter, stejně jako grafy vygenerované pomocí GNU R, podle
-kterého jsem získal inspiraci pro vzhled grafů.
-
 
 \end{document}
