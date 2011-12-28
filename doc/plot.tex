@@ -31,18 +31,18 @@ provede její analýzu a vytvoří soubor ve formátu PostScript s grafem této
 funkce na zvoleném definičním oboru.
 
 \section{Analýza úlohy}
-Abychom mohli zobrazit graf funkce jako například x $\CARET$ 2 + sin(x), musíme
-být nejdříve schopni vyhodnotit tuto funkci numericky. Tedy musíme ve výrazu
-rozpoznat jednotlivá čísla, proměnné nebo operátory a rozpoznat jejich význam.
-Standardním postupem při parsování vstupního řetězce je rozdělení úlohy na
-několik po sobě následujících částí tak, aby se případné chyby ve vstupu
-odhalily v příslušné části a nepropagovaly se do následující. Každá část
-se tedy stará pouze o chyby, které se jí týkají.
+Abychom mohli zobrazit graf funkce jako například $f(x) = x * 2 + \sin(x)$,
+musíme být nejdříve schopni vyhodnotit tuto funkci numericky. Tedy pro
+jakékoliv x chceme redukovat výraz na číslo $y = f(x)$. Vyhodnocování je vhodné
+rozdělit do více fází, protože většina práce spočívá v nalezení chyb ve výrazu.
+Každá z fází se slouží kromě svého hlavního účelu jako filtr pro případné
+chyby, které by způsobovaly zbytečné nepříjemnosti ve fázi nadcházející, ta
+poté může předpokládat vstupní řetězec bez chyb. 
 
 \subsection{Lexikální analýza}
 Místo abychom při vyhodnocování výrazu postupně hledali čísla nebo operátory,
 ponecháme tuto úlohu specializovanému nástroji, takzvanému scanneru nebo také
-lexeru.  Nadefinujeme jednotlivé symboly a necháme scanner, aby je ve vstupním
+lexeru. Nadefinujeme jednotlivé symboly a necháme scanner, aby je ve vstupním
 řetězci rozpoznal, nebo aby případně rozpoznal lexikální chyby.  Význam celé
 této fáze je v zjednodušení nadcházející fáze, která je složitější, a už se
 nebude muset zabývat problémy typu jestli je symbol skutečně číslo nebo jestli
@@ -128,7 +128,7 @@ x, aby graf nebyl kostrbatý.
 vyhlazování. Šetření zobrazenými přímkami oceníme zejména u jednoduchých
 funkcí, protože rozhodně nepotřebujeme, aby graf funkce $f(x) = x$ byl stejně
 detailní jako graf funkce $f(x) = sin(1/x)$, který je kolem nuly velmi
-detailní. Taktika je poměrně jednoduchá. Mějme zvolené nějaké počáteční
+zhuštěný. Taktika je poměrně jednoduchá. Mějme zvolené nějaké počáteční
 rozdělení osy x a pokud při zobrazování jednotlivých úseček zjistíme, že by
 došlo k příliš velkému skoku ve sklonu dvou sousedních úseček (výpočetně by
 druhá derivace přesahovala jistý zvolený práh), rozdělíme interval mezi $x_i$
@@ -168,7 +168,7 @@ tohoto průsečíku.
 
 Horší jsou funkce, které nejsou definovány v určitém místě. V některých
 případech dochází k nežádoucímu vynechání počáteční nebo konečné části grafu.
-Příkladem je jakýkoliv logaritmus, při rozdělení osy x, které vynechá bod $x =
+Příkladem je jakýkoliv logaritmus. Při rozdělení osy x, které vynechá bod $x =
 0.0$ dojde k vynechání první úsečky. Ta pak vzhledem k velkému sklonu logaritmu
 v tomto místě viditelně schází. Implementace funkcí s nenadefinovanými úseky v
 matematické knihovně v takových případech vracejí hodnotu NaN. Výpočet
@@ -184,9 +184,9 @@ tedy možná lepší NaN hodnoty pouze nezobrazovat.
 \paragraph{Lexer} 
 je konstruován jako deterministický automat, který rozpoznává celá čísla v
 šestnáctkové, desítkové a osmičkové soustavě, floating point čísla, proměnnou
-x, operátory a závorky. Mezery rovnou zahazuje. V případě chyby posílá chybový
-token do další fáze.  Token je zde struktura, která si uchovává pozici a délku
-nalezeného podřetězce a samotný řetězec pro případný výpis chyby.
+x, operátory a závorky. Mezery jsou zahozeny parserem. V případě chyby posílá
+chybový token do další fáze.  Token je zde struktura, která si uchovává pozici
+a délku nalezeného podřetězce a samotný řetězec pro případný výpis chyby.
 
 \paragraph{Parser}
 je implementace Shunting yard algoritmu, která navíc kontroluje syntaktické
@@ -219,7 +219,7 @@ Velikost jednotlivých dílků je vybrána tak, aby rozdělení osy nebylo pří
 husté ani řídké, a podle konvence, že dílky mají velikost pouze 1, 2 nebo 5
 krát mocnina deseti.
 
-Nakonec jsou zapsány závěrečné postscriptové komentáře a soubor je uzavřen.
+Nakonec jsou zapsány závěrečné postscriptové příkazy a soubor je uzavřen.
 
 Volitelný parametr popisující defiční obor a obor hodnot je analyzován stejným
 lexerem, ale má vlastní parsovací funkci.
@@ -229,8 +229,11 @@ Překlad ze zdrojových kódů provedeme pomocí příkazu make v kořenovém ad
 Program spustíme spuštěním souboru graph.exe s parametry funkce, výstupní
 soubor a volitelně rozsah osy x a y, jak je naznačeno v usage stringu programu:
 Aritmetický výraz může obsahovat běžné binární operátory (+, -, *, /, \verb|^|)
-jednoduché závorky \uv{()}, proměnnou \uv{x}, a funkce implementované v knihovně math.h (). Konstanty můžou být zadány jako celá čísla v osmičkové, desítkové nebo šestnáctkové soustavě, nebo jako floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem C).
-% TOdo math.h function list
+jednoduché závorky \uv{()}, proměnnou \uv{x}, a funkce které jsou
+implementované (jen pod jiným názvem) v knihovně math.h (abs, exp, ln, log,
+sin, cos, tan, asin, acos, atan, sinh, cosh, tanh). Konstanty můžou být zadány
+jako celá čísla v osmičkové, desítkové nebo šestnáctkové soustavě, nebo jako
+floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem C).
 
 \begin{verbatim}
 usage: graph.exe FUNCTION FILE.ps [LIMITS]
@@ -249,10 +252,10 @@ Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze 3, může
 být použit přímo v typografickém nástroji \LaTeX.
 
 \section{Závěr}
-Největší překážkou nakonec bylo možná unární mínus, přestože vypadá nevinně.
-Použitá metoda na parsování výrazu ho zřejmě neumí přeložit jinak, než mu dát
-nejvyšší precedenci. Přesvědčila mě o tom i skutečnost, že výrobci kalkulátorů
-a software používající shunting yard algoritmus na vyhodnocování aritmetických
+Největší překážkou bylo unární mínus, přestože vypadá nevinně.  Použitá metoda
+na parsování výrazu ho zřejmě neumí přeložit jinak, než mu dát nejvyšší
+precedenci. Přesvědčila mě o tom i skutečnost, že výrobci kalkulátorů a
+software používající shunting yard algoritmus na vyhodnocování aritmetických
 výrazů používají právě toto řešení \cite{minus}. Možným vylepšením by bylo
 použít sofistikovanější parsování převedením na strom (arithmetic tree
 notation), nicměně tento způsob vypadá komplikovaně, co se týče správného
@@ -262,9 +265,9 @@ Testování proběhlo pro většinu možných případů, všechny dopadly úsp�
 zajištěno, aby nedocházelo k únikům paměti, přestože paměťová náročnost
 programu je minimální a dealokování celého bloku operačním systémem by bylo
 efektivnější.  Stejně jako v každém softwaru, i zde se můžou objevit drobné
-chyby, prakticky nelze zajistit, aby byl program perfektní.
-Zadání bylo dle mého subjektivního názoru splněno kompletně. Vygenerované grafy
-jsou esteticky hezké a díky použitým metodám i úsporné. Je možné je použít jako
-doprovodné obrázky v nástroji \LaTeX.
+chyby, prakticky nelze zajistit, aby byl program perfektní.  Zadání bylo dle
+mého subjektivního názoru splněno kompletně. Vygenerované grafy jsou esteticky
+hezké a díky použitým metodám i úsporné. Je možné je použít jako doprovodné
+obrázky v nástroji \LaTeX.
 
 \end{document}
