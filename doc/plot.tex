@@ -249,5 +249,22 @@ Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze 3, může
 být použit přímo v typografickém nástroji \LaTeX.
 
 \section{Závěr}
+Největší překážkou nakonec bylo možná unární mínus, přestože vypadá nevinně.
+Použitá metoda na parsování výrazu ho zřejmě neumí přeložit jinak, než mu dát
+nejvyšší precedenci. Přesvědčila mě o tom i skutečnost, že výrobci kalkulátorů
+a software používající shunting yard algoritmus na vyhodnocování aritmetických
+výrazů používají právě toto řešení \cite{minus}. Možným vylepšením by bylo
+použít sofistikovanější parsování převedením na strom (arithmetic tree
+notation), nicměně tento způsob vypadá komplikovaně, co se týče správného
+zacházení s precedencemi operátorů. Tato metoda by byla náročnější na paměť,
+což může být v prostředí s omezenou pamětí (kapesní kalkulátor) kritické.
+Testování proběhlo pro většinu možných případů, všechny dopadly úspěšně. Je
+zajištěno, aby nedocházelo k únikům paměti, přestože paměťová náročnost
+programu je minimální a dealokování celého bloku operačním systémem by bylo
+efektivnější.  Stejně jako v každém softwaru, i zde se můžou objevit drobné
+chyby, prakticky nelze zajistit, aby byl program perfektní.
+Zadání bylo dle mého subjektivního názoru splněno kompletně. Vygenerované grafy
+jsou esteticky hezké a díky použitým metodám i úsporné. Je možné je použít jako
+doprovodné obrázky v nástroji \LaTeX.
 
 \end{document}
