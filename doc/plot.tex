@@ -3,6 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{epstopdf}
+\usepackage[pdfborder=0 0 0]{hyperref}
 %% \usepackage{a4wide}
 
 \newcommand\CARET{\mathbin{\char`\^}}
@@ -79,7 +80,7 @@ x * $\sin$ (x $\CARET$ 2) & x x 2 $\CARET$ $\sin$ * \\
 \end{center}
 
 Metoda na převedení infixového do postfixového zápisu je např. Dijkstrův
-Shunting yard algoritmus.
+Shunting yard algoritmus\cite{wikiShunting}\cite{shewchuk}.
 
 
 \subsection{Shunting yard}
@@ -124,7 +125,7 @@ Jednoduchým řešením jak zobrazit funkci je vyhodnotit vždy dva sousední bo
 spojit je úsečkou. Důležité je pouze zvolit dostatečně detailní rozdělení osy
 x, aby graf nebyl kostrbatý.
 
-Úsporná metoda, která řeší kostrbatost zobrazené funkce je adaptivní
+Úsporná metoda, která řeší hladkost grafu zobrazené funkce je adaptivní
 vyhlazování. Šetření zobrazenými přímkami oceníme zejména u jednoduchých
 funkcí, protože rozhodně nepotřebujeme, aby graf funkce $f(x) = x$ byl stejně
 detailní jako graf funkce $f(x) = sin(1/x)$, který je kolem nuly velmi
@@ -226,8 +227,12 @@ lexerem, ale má vlastní parsovací funkci.
 
 \section{Uživatelská příručka}
 Překlad ze zdrojových kódů provedeme pomocí příkazu make v kořenovém adresáři.
-Program spustíme spuštěním souboru graph.exe s parametry funkce, výstupní
+Program spustíme příkazem ./graph.exe s parametry funkce, výstupní
 soubor a volitelně rozsah osy x a y, jak je naznačeno v usage stringu programu:
+\begin{verbatim}
+usage: graph.exe FUNCTION FILE [LIMITS]
+\end{verbatim}
+
 Aritmetický výraz může obsahovat běžné binární operátory (+, -, *, /, \verb|^|)
 jednoduché závorky \uv{()}, proměnnou \uv{x}, a funkce které jsou
 implementované (jen pod jiným názvem) v knihovně math.h (abs, exp, ln, log,
@@ -238,9 +243,6 @@ floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem
 Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze~3, může
 být použit přímo v typografickém nástroji \LaTeX.
 
-\begin{verbatim}
-usage: graph.exe FUNCTION FILE.ps [LIMITS]
-\end{verbatim}
 \subsection{Příklady použití}
 \begin{verbatim}
 graph.exe "sin(1/x^2)" vystup.ps 
@@ -275,4 +277,21 @@ mého subjektivního názoru splněno kompletně. Vygenerované grafy jsou estet
 hezké a díky použitým metodám i úsporné. Je možné je použít jako doprovodné
 obrázky v nástroji \LaTeX.
 
+\begin{thebibliography}{1}
+\bibitem[1]{wikiShunting}
+{\em Wikipedia contributors} \\ 
+{\bf "Shunting-yard algorithm," Wikipedia, The Free Encyclopedia} \\
+\url{http://en.wikipedia.org/w/index.php?title=Shunting-yard_algorithm&oldid=464122750} \\
+(accessed December 29, 2011). \\
+
+\bibitem[2]{shewchuk}
+{\em Jonathan Shewchuk} \\
+{\bf CS 61B Lecture 37: Expression Parsing} (video) 2006 \\
+\url{http://www.youtube.com/watch?v=ch7fivnW45Q} \\
+
+\bibitem[3]{minus}
+{\em Douglas P. McNutt} \\
+{\bf Precedence and Prophylactic Parentheses} \\
+\url{http://www.macnauchtan.com/pub/precedence.html} \\
+\end{thebibliography}
 \end{document}

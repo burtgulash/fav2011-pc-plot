@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -pedantic -ansi
-EXEC = plot
+EXEC = graph.exe
 SRCS = main.c lexer.c parser.c func.c plot.c
 OBJS = $(SRCS:.c=.o)
 
