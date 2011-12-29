@@ -80,48 +80,15 @@ x * $\sin$ (x $\CARET$ 2) & x x 2 $\CARET$ $\sin$ * \\
 \end{center}
 
 Metoda na převedení infixového do postfixového zápisu je např. Dijkstrův
-Shunting yard algoritmus\cite{wikiShunting}\cite{shewchuk}.
+Shunting yard algoritmus\cite{wikiShunting}\cite{shewchuk}, který je
+standardním postupem díky své jednoduchosti~a výpočetní nenáročnosti. Používají
+ho kapesní kalkulátory~i software určený pro jednoduché výpočty kvůli minimální
+náročnosti na paměť.
 
 
-\subsection{Shunting yard}
-Při konverzi musíme mít na paměti přednosti jednotlivých operátorů. Výraz
-$1 + 2 * 3$ se musí přeložit jako $1~2~3~*~+$ a ne jako $1~2~+~3~*$.  Dále také
-levou nebo pravou asociaci nekomutativních operátorů, pokud ve výrazů chybí
-závorky.  Například operátor odčítání upřednostňuje levé uzávorkování ($1 - 2 -
-3 = ((1 - 2) - 3)$) oproti umocňování, které naopak upřednostňuje uzávorkování
-zprava ($2~\CARET~3~\CARET~4 = (2~\CARET~(3~\CARET~4)) = 2^{3^4}$).
-
-Algoritmus používá pomocný zásobník na odkládání operátorů, dokud nemá jistotu
-o jejich správném umístění v postfixu. Čteme infixový výraz zleva doprava po
-jednotlivých symbolech a vždy když narazíme na symbol typu číslo nebo proměnná,
-pouze ho uložíme do výsledné výstupní fronty. Pokud narazíme na operátor,
-všechny operátory, které dosud leží nahoře v zásobníku a vážou se těsněji (mají
-vyšší precedenci) než právě vytažený symbol, můžeme přidat do výsledné fronty.
-Právě vytažený symbol pak pouze vložíme na zásobník. Až nám dojdou všechny
-symboly, pouze vytáhneme všechny operátory ze zásobníku a v tomto pořadí je
-přidáme do výsledné fronty. \\
-
-Jako příklad použijme výraz 1 / 2~$\CARET$~3 + 4.
-\begin{center}
-\begin{tabular}{|c|l|l|r|}
-\hline
-symbol & výsledek & zásobník & akce \\
-\hline
-1 & 1 & & číslo, pouze přidáme do fronty \\
-/ & 1 & / & dosud žádný operátor v zásobníku\\
-2 & 1 2 & / & číslo, pouze přidáme do fronty \\
-$\CARET$ & 1 2 & / $\CARET$ & / má slabší vazbu než $\CARET$, necháme být \\
-3 & 1 2 3 & / $\CARET$ & číslo, pouze přidáme do fronty \\
-+ & 1 2 3 $\CARET$ / & + & $\CARET$ a / mají silnější vazbu než + \\
-4 & 1 2 3 $\CARET$ / 4 & + & číslo, pouze přidáme do fronty \\
-konec  & 1 2 3 $\CARET$ / 4 + & & konec, přidáme všechny operátory \\
-
-\hline
-\end{tabular}
-\end{center}
 
 \subsection{Zobrazení grafu}
-Jednoduchým řešením jak zobrazit funkci je vyhodnotit vždy dva sousední body a
+Jednoduchým řešením jak zobrazit funkci je vyhodnotit vždy dva sousední body~a
 spojit je úsečkou. Důležité je pouze zvolit dostatečně detailní rozdělení osy
 x, aby graf nebyl kostrbatý.
 
@@ -207,6 +174,44 @@ Shunting yard algoritmu a poté při kontrolním průchodu výsledným postfixov
 výrazem, kdy se potvrdí, že výraz bude skutečně možné vyhodnotit. Zde se
 odstraní chyby související s n-aritou operátorů.
 
+\subsection{Shunting yard}
+Při konverzi do postfixu musíme mít na paměti přednosti jednotlivých operátorů.
+Výraz $1 + 2 * 3$ se musí přeložit jako $1~2~3~*~+$ a ne jako $1~2~+~3~*$.
+Dále také levou nebo pravou asociaci nekomutativních operátorů, pokud ve výrazů
+chybí závorky.  Například operátor odčítání upřednostňuje levé uzávorkování ($1
+- 2 - 3 = ((1 - 2) - 3)$) oproti umocňování, které naopak upřednostňuje
+uzávorkování zprava ($2~\CARET~3~\CARET~4 = (2~\CARET~(3~\CARET~4)) =
+2^{3^4}$).
+
+Algoritmus používá pomocný zásobník na odkládání operátorů, dokud nemá jistotu
+o jejich správném umístění v postfixu. Čteme infixový výraz zleva doprava po
+jednotlivých symbolech a vždy když narazíme na symbol typu číslo nebo proměnná,
+pouze ho uložíme do výsledné výstupní fronty. Pokud narazíme na operátor,
+všechny operátory, které dosud leží nahoře v zásobníku a vážou se těsněji (mají
+vyšší precedenci) než právě vytažený symbol, můžeme přidat do výsledné fronty.
+Právě vytažený symbol pak pouze vložíme na zásobník. Až nám dojdou všechny
+symboly, pouze vytáhneme všechny operátory ze zásobníku a v tomto pořadí je
+přidáme do výsledné fronty. \\
+
+Jako příklad použijme výraz 1 / 2~$\CARET$~3 + 4.
+\begin{center}
+\begin{tabular}{|c|l|l|r|}
+\hline
+symbol & výsledek & zásobník & akce \\
+\hline
+1 & 1 & & číslo, pouze přidáme do fronty \\
+/ & 1 & / & dosud žádný operátor v zásobníku\\
+2 & 1 2 & / & číslo, pouze přidáme do fronty \\
+$\CARET$ & 1 2 & / $\CARET$ & / má slabší vazbu než $\CARET$, necháme být \\
+3 & 1 2 3 & / $\CARET$ & číslo, pouze přidáme do fronty \\
++ & 1 2 3 $\CARET$ / & + & $\CARET$ a / mají silnější vazbu než + \\
+4 & 1 2 3 $\CARET$ / 4 & + & číslo, pouze přidáme do fronty \\
+konec  & 1 2 3 $\CARET$ / 4 + & & konec, přidáme všechny operátory \\
+
+\hline
+\end{tabular}
+\end{center}
+
 \paragraph{Zobrazení grafu}
 je zajištěno dalším odděleným modulem. Ten nejprve zkonstruuje hlavičku
 postscriptového souboru podle specifikace postscriptu. 
@@ -228,37 +233,59 @@ lexerem, ale má vlastní parsovací funkci.
 \section{Uživatelská příručka}
 Překlad ze zdrojových kódů provedeme pomocí příkazu make v kořenovém adresáři.
 Program spustíme příkazem ./graph.exe s parametry funkce, výstupní
-soubor a volitelně rozsah osy x a y, jak je naznačeno v usage stringu programu:
+soubor a volitelně rozsah osy x a y, jak je naznačeno v~usage stringu programu:
 \begin{verbatim}
 usage: graph.exe FUNCTION FILE [LIMITS]
 \end{verbatim}
 
-Aritmetický výraz může obsahovat běžné binární operátory (+, -, *, /, \verb|^|)
+Aritmetický výraz může obsahovat běžné binární operátory (+,~-,~*,~/,~\verb|^|)
 jednoduché závorky \uv{()}, proměnnou \uv{x}, a funkce které jsou
 implementované (jen pod jiným názvem) v knihovně math.h (abs, exp, ln, log,
 sin, cos, tan, asin, acos, atan, sinh, cosh, tanh). Konstanty můžou být zadány
 jako celá čísla v osmičkové, desítkové nebo šestnáctkové soustavě, nebo jako
-floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem C).
+floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem~C).
 
 Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze~3, může
 být použit přímo v typografickém nástroji \LaTeX.
 
 \subsection{Příklady použití}
 \begin{verbatim}
-graph.exe "sin(1/x^2)" vystup.ps 
+graph.exe "sin(x + 1/x^3) * -x" vystup.ps 
 \end{verbatim}
-Do souboru vystup.ps je zapsán graf funkce $\sin (1/x^2)$
+Do souboru vystup.ps je zapsán graf funkce $\sin (1 / x^2)$
 s vestavěným definičním oborem a oborem hodnot $x, y \in [-10, 10]$.
+\begin{figure}[ht!]
+\centering
+	\includegraphics[width=13cm]{figures/test1.eps}
+	\caption{výsledek příkazu, graf funkce $\sin \left(x + 1/x^3 \right) * -x$}
+\end{figure}
+\clearpage
+
 \begin{verbatim}
-graph.exe "sin(1/x^2)" vystup.ps -3:3:-2:2 
+graph.exe "sin(x + 1/x^3) * -x" vystup.ps -3.4:3.4:-1.2:1.2
 \end{verbatim}
 Stejný příkaz, pouze použije jiný rozsah pro definiční obor ($x \in [-3, 3]$) a
 obor hodnot ($y \in [-2, 2]$).
+\begin{figure}[ht!]
+\centering
+	\includegraphics[width=13cm]{figures/test2.eps}
+	\caption{výsledek příkazu, graf funkce $\sin \left(x + 1/x^3 \right) * -x$}
+\end{figure}
 
 
-Rozsahy jsou jsou specifikovány dobrovolným parametrem, který má formát x1:x2:y1:y2, kde x1 a y1 musí být menší než x2, respektive y2. 
+Rozsahy jsou jsou specifikovány dobrovolným parametrem, který má formát
+x1:x2:y1:y2, kde x1 a y1 musí být menší než x2, respektive y2. 
+
+Při chybném vstupu program vypíše typ chyby a ukáže na její pozici ve vstupním
+řetězci. Někdy může být výpis chyby matoucí, například při chybějící závorce,
+protože je chyba odhalena až na konci.
+
 
 \section{Závěr}
+Pro přehlednost byly zdrojové kódy vzhledově vyčištěny utilitou GNU indent~s
+odsazovacím stylem Kernighan \& Ritchie a~s~volbou odstranění tabulátorů, které
+v některých editorech způsobují potíže.
+
 Největší překážkou bylo unární mínus, přestože vypadá nevinně.  Použitá metoda
 na parsování výrazu ho zřejmě neumí přeložit jinak, než mu dát nejvyšší
 precedenci. Přesvědčila mě o tom i skutečnost, že výrobci kalkulátorů a
@@ -272,10 +299,12 @@ Testování proběhlo pro většinu možných případů, všechny dopadly úsp�
 zajištěno, aby nedocházelo k únikům paměti, přestože paměťová náročnost
 programu je minimální a dealokování celého bloku operačním systémem by bylo
 efektivnější.  Stejně jako v každém softwaru, i zde se můžou objevit drobné
-chyby, prakticky nelze zajistit, aby byl program perfektní.  Zadání bylo dle
+chyby, prakticky nelze zajistit, aby byl program perfektní. Zadání bylo dle
 mého subjektivního názoru splněno kompletně. Vygenerované grafy jsou esteticky
-hezké a díky použitým metodám i úsporné. Je možné je použít jako doprovodné
-obrázky v nástroji \LaTeX.
+hezké a díky použitým metodám i prostorově úsporné. Vzhled grafu a rámečku je
+inspirovaný grafy vygenerovanými programem GNU R, který je často ceněn právě
+pro široký výběr, přehlednost a vzhled svých grafů. 
+
 
 \begin{thebibliography}{1}
 \bibitem[1]{wikiShunting}
