@@ -2,17 +2,22 @@
 #define LEXER_H
 
 /* all possible token types */
-enum {T_HEX, T_OCT, T_DEC, T_FLOAT, T_VAR, T_FUN, T_OP, 
-      T_LPAREN, T_RPAREN, T_COLON, T_ERROR, T_EOF, T_SPACE};
+enum { T_HEX, T_OCT, T_DEC, T_FLOAT, T_VAR, T_FUN, T_OP,
+    T_LPAREN, T_RPAREN, T_COLON, T_ERROR, T_EOF, T_SPACE
+};
 
 /* token structure */
 typedef struct {
-	/* token type */
-    int type; 
-	/* position in 'context' string and length of token */
+    /* token type */
+    int type;
+    /* position in 'context' string and length of token */
     int pos, len;
-    char * context;
+    char *context;
 } token;
 
-token * next_tok(char * expr, int i);
+/*
+ * Returns token found in expression 'expr' on 'i'-th position.
+ * Possible types of tokens are specified in enum in lexer.h
+ */
+token *next_tok(char *expr, int i);
 #endif

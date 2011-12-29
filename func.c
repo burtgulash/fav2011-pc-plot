@@ -127,7 +127,7 @@ Operator match_operator(char c, int last)
     op.assoc = LEFT;
     op.binary = 1;
     op.eval = NULL;
-	op.prec = 0;
+    op.prec = 0;
 
     switch (c) {
     case '-':
@@ -161,7 +161,7 @@ Operator match_operator(char c, int last)
         break;
     }
 
-    assert (op.eval != NULL);
+    assert(op.eval != NULL);
     return op;
 }
 

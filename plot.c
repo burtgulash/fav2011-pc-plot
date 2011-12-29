@@ -59,8 +59,11 @@ static double scale_y;
 #define IS_NAN(x) (x != x)
 
 
-/* Function that evaluates parsed expression in given point 'x'.
- * 'x' is a number that is plugged for 'x' variable in expression */
+/* Function that evaluates parsed expression at a given point 'x'.
+ * 'x' is a number that is plugged for 'x' variable in expression.
+ * Evaluation is not checked, parsed expression must be cleaned 
+ * at this stage.
+ */
 static double evaluate(parsed_expr p, double x)
 {
     int i;
@@ -68,6 +71,8 @@ static double evaluate(parsed_expr p, double x)
     double a, b;
 
     sp = 0;
+    /* if symbol is an operator, pop off two symbols, they are guaranteed
+     * to be numbers or variable */
     for (i = 0; i < p.length; i++) {
         sym = p.expr[i];
 
@@ -81,6 +86,7 @@ static double evaluate(parsed_expr p, double x)
                 PUSH((sym->op.eval) (a, 0));
             break;
 
+            /* nothing special happens in case of numbers and variables */
         case NUM:
             PUSH(sym->number);
             break;
@@ -91,6 +97,7 @@ static double evaluate(parsed_expr p, double x)
         }
     }
 
+    /* return remaining element on the stack */
     return stack[0];
 }
 
@@ -108,6 +115,8 @@ static void plot_init(int size, Limits * lims)
     stack = (double *) calloc(size, sizeof(double));
     sp = 0;
 
+    /* find scale coefficients from real number coordinates to bounding box
+     * coordinates */
     scale_x = (URX - LLX - 2 * BLANK) / (x_high - x_low);
     scale_y = (URY - LLY - 2 * BLANK) / (y_high - y_low);
 }
@@ -173,10 +182,14 @@ static void plot(FILE * out, parsed_expr p)
     while (x_2 <= x_high) {
         if (IS_NAN(y_2))
             last_nan = 1;
+        /* next point is in bounding box, thus can be plotted */
         else if (y_low <= y_2 && y_2 <= y_high) {
+            /* handle case where last point was NaN */
             if (last_nan) {
                 MOVETO(x_2, y_2);
                 last_nan = 0;
+                /* handle case where last point was out of box, find intersections
+                   with box */
             } else if (last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
@@ -193,6 +206,7 @@ static void plot(FILE * out, parsed_expr p)
             LINETO(x_2, y_2);
 
             last_out = 0;
+            /* case where next point is out of box */
         } else {
             if (!last_out && !last_nan) {
                 if (y_2 > y_1) {
@@ -223,6 +237,7 @@ static void plot(FILE * out, parsed_expr p)
         y_1 = y_2;
         x_2 = x_1 + delta;
         y_2 = evaluate(p, x_2);
+
         /* if plot is too sharp or too smooth, find appropriate smoothness lvl 
          */
         if (TOO_SHARP()) {
@@ -275,6 +290,10 @@ static void write_header(FILE * out, char *expression)
 /* length of plot label line in standard postscript units */
 #define LINE_LEN  8
 
+
+/* write description of axis, can be used for both horizontal
+ * and vertical axis as specified by 'horizontal' flag
+ */
 static void write_axis_units(FILE * out, int horizontal)
 {
     double size;
@@ -293,6 +312,7 @@ static void write_axis_units(FILE * out, int horizontal)
 
     /* find scale of corresponding axis */
     power = ceil(log10(size / (MAX_UNITS - 1)) - 1);
+    /* try all three allowed subdivisions (1, 2, 5) */
     if (size / (2 * pow(10, power)) < (MAX_UNITS - 1))
         axis_scale = 2;
     else if (size / (5 * pow(10, power)) < (MAX_UNITS - 1))
@@ -302,7 +322,9 @@ static void write_axis_units(FILE * out, int horizontal)
         power++;
     }
 
+    /* find distance between two consecutive labels */
     unit_size = axis_scale * pow(10, power);
+    /* find position of first label */
     if (horizontal) {
         unit_position = x_low - fmod(x_low, unit_size);
         if (x_low > 0)
