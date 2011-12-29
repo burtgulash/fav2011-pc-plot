@@ -32,8 +32,15 @@ typedef struct {
 } parsed_expr;
 
 
+/* Parse arithmetic expression given as a string.
+ * Heavily checked, resulting parsed expression is guaranteed to be evaluable
+ */
 parsed_expr parse(char *expr);
+
+/* Prints description of lexical or parsing error */
 parsed_expr parse_error(token * tok, const char *error_msg);
+
+/* deallocate all memory held by parser */
 void dispose(parsed_expr p);
 
 #endif

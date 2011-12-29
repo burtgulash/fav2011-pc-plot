@@ -6,6 +6,7 @@ typedef struct {
     double x_low, x_high, y_low, y_high;
 } Limits;
 
+
 /* Evaluates and plots parsed arithmetic expression and writes all
  * PostScript commands to file out
  */

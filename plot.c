@@ -188,8 +188,10 @@ static void plot(FILE * out, parsed_expr p)
             if (last_nan) {
                 MOVETO(x_2, y_2);
                 last_nan = 0;
-                /* handle case where last point was out of box, find intersections
-                   with box */
+            /* handle case where last point was out of box, 
+             * find intersections with box. Next line will start
+             * from this point 
+             */
             } else if (last_out) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
@@ -206,8 +208,10 @@ static void plot(FILE * out, parsed_expr p)
             LINETO(x_2, y_2);
 
             last_out = 0;
-            /* case where next point is out of box */
+            /* case where next point is out of the box */
         } else {
+			/* if last point was in the box, stroke a line to the intersection
+             * with y-boundary */
             if (!last_out && !last_nan) {
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_high);
@@ -351,6 +355,7 @@ static void write_axis_units(FILE * out, int horizontal)
 
             unit_position += unit_size;
         } while (unit_position <= x_high);
+	/* in case of vertical axis, do the same, only rotate the labels */
     } else {
         do {
             MOVETO(x_low, unit_position);
