@@ -235,21 +235,26 @@ sin, cos, tan, asin, acos, atan, sinh, cosh, tanh). Konstanty můžou být zadá
 jako celá čísla v osmičkové, desítkové nebo šestnáctkové soustavě, nebo jako
 floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem C).
 
+Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze~3, může
+být použit přímo v typografickém nástroji \LaTeX.
+
 \begin{verbatim}
 usage: graph.exe FUNCTION FILE.ps [LIMITS]
 \end{verbatim}
-Příklad použití:
+\subsection{Příklady použití}
 \begin{verbatim}
 graph.exe "sin(1/x^2)" vystup.ps 
-Do souboru vystup.ps je zapsán graf funkce
-sin(1/x^2) s vestavěným definičním oborem a oborem hodnot x, y \elem [-10, 10].
-graph.exe "sin(1/x^2)" vystup.ps -3:3:-2:2 
-Stejný příkaz, pouze použije jiný
-rozsah pro definiční obor (x \elem [-3, 3]) a obor hodnot (y \elem [-2, 2]).
 \end{verbatim}
+Do souboru vystup.ps je zapsán graf funkce $\sin (1/x^2)$
+s vestavěným definičním oborem a oborem hodnot $x, y \in [-10, 10]$.
+\begin{verbatim}
+graph.exe "sin(1/x^2)" vystup.ps -3:3:-2:2 
+\end{verbatim}
+Stejný příkaz, pouze použije jiný rozsah pro definiční obor ($x \in [-3, 3]$) a
+obor hodnot ($y \in [-2, 2]$).
+
+
 Rozsahy jsou jsou specifikovány dobrovolným parametrem, který má formát x1:x2:y1:y2, kde x1 a y1 musí být menší než x2, respektive y2. 
-Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze 3, může
-být použit přímo v typografickém nástroji \LaTeX.
 
 \section{Závěr}
 Největší překážkou bylo unární mínus, přestože vypadá nevinně.  Použitá metoda
