@@ -61,7 +61,7 @@ static double scale_y;
 
 /* Function that evaluates parsed expression in given point 'x'.
  * 'x' is a number that is plugged for 'x' variable in expression */
-double evaluate(parsed_expr p, double x)
+static double evaluate(parsed_expr p, double x)
 {
     int i;
     symbol *sym;
@@ -96,7 +96,7 @@ double evaluate(parsed_expr p, double x)
 
 
 /* Sets all global variables with values that are known initially */
-int plot_init(int size, Limits * lims)
+static void plot_init(int size, Limits * lims)
 {
     if (lims) {
         x_low = lims->x_low;
@@ -110,7 +110,6 @@ int plot_init(int size, Limits * lims)
 
     scale_x = (URX - LLX - 2 * BLANK) / (x_high - x_low);
     scale_y = (URY - LLY - 2 * BLANK) / (y_high - y_low);
-    return 1;
 }
 
 

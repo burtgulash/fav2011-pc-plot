@@ -41,7 +41,7 @@ static int num_sym = 0;
 
 
 /* initialize parser, that is allocate stack and helper data structures */
-void parser_init(int size)
+static void parser_init(int size)
 {
     stack = (symbol **) calloc(size, sizeof(symbol *));
     symbols = (symbol **) calloc(size, sizeof(symbol *));
@@ -87,7 +87,7 @@ parsed_expr parse_error(token * tok, const char *error_msg)
 
 
 /* Helper function for creating empty symbols */
-symbol *make_symbol(int type, token * tok, double number)
+static symbol *make_symbol(int type, token * tok, double number)
 {
     symbol *sym = (symbol *) malloc(sizeof(symbol));
 
@@ -104,7 +104,7 @@ symbol *make_symbol(int type, token * tok, double number)
 /* Blind evaluation, detects function n-arity errors and
  * errors caused by wrong order of symbols. (consecutive numbers or operators)
  */
-parsed_expr check(int length, symbol ** queue)
+static parsed_expr check(int length, symbol ** queue)
 {
     parsed_expr result;
 

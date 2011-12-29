@@ -21,98 +21,98 @@ char *functions[NUM_F] = { "abs", "exp", "ln", "log",
 };
 
 /* function wrappers. */
-double add(double a, double b)
+static double Add(double a, double b)
 {
     return a + b;
 }
 
-double neg(double a, double b)
+static double Neg(double a, double b)
 {
     return -a;
 }
 
-double sub(double a, double b)
+static double Sub(double a, double b)
 {
     return a - b;
 }
 
-double mul(double a, double b)
+static double Mul(double a, double b)
 {
     return a * b;
 }
 
-double div(double a, double b)
+static double Div(double a, double b)
 {
     return a / b;
 }
 
-double Pow(double a, double b)
+static double Pow(double a, double b)
 {
     return pow(a, b);
 }
 
 /* unary functions are made binary with the second argument dead */
-double Abs(double a, double b)
+static double Abs(double a, double b)
 {
     return fabs(a);
 }
 
-double Exp(double a, double b)
+static double Exp(double a, double b)
 {
     return exp(a);
 }
 
-double Ln(double a, double b)
+static double Ln(double a, double b)
 {
     return log(a);
 }
 
-double Log10(double a, double b)
+static double Log10(double a, double b)
 {
     return log10(a);
 }
 
-double Sin(double a, double b)
+static double Sin(double a, double b)
 {
     return sin(a);
 }
 
-double Cos(double a, double b)
+static double Cos(double a, double b)
 {
     return cos(a);
 }
 
-double Tan(double a, double b)
+static double Tan(double a, double b)
 {
     return tan(a);
 }
 
-double Asin(double a, double b)
+static double Asin(double a, double b)
 {
     return asin(a);
 }
 
-double Acos(double a, double b)
+static double Acos(double a, double b)
 {
     return acos(a);
 }
 
-double Atan(double a, double b)
+static double Atan(double a, double b)
 {
     return atan(a);
 }
 
-double Sinh(double a, double b)
+static double Sinh(double a, double b)
 {
     return sinh(a);
 }
 
-double Cosh(double a, double b)
+static double Cosh(double a, double b)
 {
     return cosh(a);
 }
 
-double Tanh(double a, double b)
+static double Tanh(double a, double b)
 {
     return tanh(a);
 }
@@ -127,6 +127,7 @@ Operator match_operator(char c, int last)
     op.assoc = LEFT;
     op.binary = 1;
     op.eval = NULL;
+	op.prec = 0;
 
     switch (c) {
     case '-':
@@ -135,23 +136,23 @@ Operator match_operator(char c, int last)
             op.prec = 4;
             op.assoc = RIGHT;
             op.binary = 0;
-            op.eval = neg;
+            op.eval = Neg;
         } else {
             op.prec = 1;
-            op.eval = sub;
+            op.eval = Sub;
         }
         break;
     case '+':
-        op.eval = add;
+        op.eval = Add;
         op.prec = 1;
         break;
     case '/':
         op.prec = 2;
-        op.eval = div;
+        op.eval = Div;
         break;
     case '*':
         op.prec = 2;
-        op.eval = mul;
+        op.eval = Mul;
         break;
     case '^':
         op.prec = 3;
@@ -160,7 +161,7 @@ Operator match_operator(char c, int last)
         break;
     }
 
-    assert(op.eval);
+    assert (op.eval != NULL);
     return op;
 }
 
@@ -204,6 +205,6 @@ Operator match_fun(char *fun_str)
         op.eval = Tanh;
 
     /* fail if string was not matched */
-    assert(op.eval);
+    assert(op.eval != NULL);
     return op;
 }

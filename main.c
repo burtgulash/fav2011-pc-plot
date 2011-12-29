@@ -12,7 +12,7 @@
  * Parses string containing encoded plot limits and writes then to 'limits' 
  * returns 1 on success, 0 if parse error.
  */
-int parse_limits(Limits * limits, char *lim_string)
+static int parse_limits(Limits * limits, char *lim_string)
 {
     token *tok;
     char *tmp;
@@ -109,7 +109,7 @@ int main(int argc, char **argv)
                 plot_file = fopen(argv[2], "w");
                 if (plot_file != NULL) {
                     write_ps(plot_file, parsed, argv[1], NULL);
-                    fclose(plot_file);
+                    (void) fclose(plot_file);
                 } else {
                     perror(FILE_OPENING_ERROR);
                     exit_code = EXIT_FAILURE;
@@ -121,7 +121,7 @@ int main(int argc, char **argv)
                     plot_file = fopen(argv[2], "w");
                     if (plot_file != NULL) {
                         write_ps(plot_file, parsed, argv[1], lims);
-                        fclose(plot_file);
+                        (void) fclose(plot_file);
                     } else {
                         perror(FILE_OPENING_ERROR);
                         exit_code = EXIT_FAILURE;
