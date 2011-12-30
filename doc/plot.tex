@@ -150,12 +150,13 @@ tedy možná lepší NaN hodnoty pouze nezobrazovat.
 
 
 \section{Implementace}
-\paragraph{Lexer} 
-je konstruován jako deterministický automat, který rozpoznává celá čísla v
-šestnáctkové, desítkové a osmičkové soustavě, floating point čísla, proměnnou
-x, operátory a závorky. Mezery jsou zahozeny parserem. V případě chyby posílá
-chybový token do další fáze.  Token je zde struktura, která si uchovává pozici
-a délku nalezeného podřetězce a samotný řetězec pro případný výpis chyby.
+\subsection{Lexer} 
+V souboru {\em lexer.c} je konstruován jako deterministický automat, který
+rozpoznává celá čísla v šestnáctkové, desítkové a osmičkové soustavě, floating
+point čísla, proměnnou x, operátory a závorky. Mezery jsou zahozeny parserem. V
+případě chyby posílá chybový token do další fáze.  Token je zde struktura,
+která si uchovává pozici a délku nalezeného podřetězce a samotný řetězec pro
+případný výpis chyby.
 
 \paragraph{Parser}
 je implementace Shunting yard algoritmu, která navíc kontroluje syntaktické
@@ -233,7 +234,7 @@ lexerem, ale má vlastní parsovací funkci.
 
 \section{Uživatelská příručka}
 Překlad ze zdrojových kódů provedeme pomocí příkazu make v kořenovém adresáři.
-Je třeba mít nainstalovaný GNU make, je dostupný pro více platforem. Program
+Je třeba mít nainstalovaný GNU make nebo jinou verzi make, která je kompatibilní s GNU makefile, je dostupný pro více platforem. Program
 spustíme příkazem ./graph.exe s parametry funkce, výstupní soubor a volitelně
 rozsah osy x a y, jak je naznačeno v~usage stringu programu:
 \begin{verbatim}
@@ -288,7 +289,7 @@ Pro přehlednost byly zdrojové kódy vzhledově vyčištěny utilitou GNU inden
 odsazovacím stylem Kernighan \& Ritchie a~s~volbou odstranění tabulátorů, které
 v některých editorech způsobují potíže.
 
-Největší překážkou bylo unární mínus, přestože vypadá nevinně.  Použitá metoda
+Největší překážkou bylo unární mínus, přestože vypadá nevinně. Použitá metoda
 na parsování výrazu ho zřejmě neumí přeložit jinak, než mu dát nejvyšší
 precedenci. Přesvědčila mě o tom i skutečnost, že výrobci kalkulátorů a
 software používající shunting yard algoritmus na vyhodnocování aritmetických
@@ -297,6 +298,7 @@ použít sofistikovanější parsování převedením na strom (arithmetic tree
 notation), nicměně tento způsob vypadá komplikovaně, co se týče správného
 zacházení s precedencemi operátorů. Tato metoda by byla náročnější na paměť,
 což může být v prostředí s omezenou pamětí (kapesní kalkulátor) kritické.
+
 Testování proběhlo pro většinu možných případů, všechny dopadly úspěšně. Je
 zajištěno, aby nedocházelo k únikům paměti, přestože paměťová náročnost
 programu je minimální a dealokování celého bloku operačním systémem by bylo
@@ -306,6 +308,15 @@ mého subjektivního názoru splněno kompletně. Vygenerované grafy jsou estet
 hezké a díky použitým metodám i prostorově úsporné. Vzhled grafu a rámečku je
 inspirovaný grafy vygenerovanými programem GNU R, který je často ceněn právě
 pro široký výběr, přehlednost a vzhled svých grafů. 
+
+\subsection{Měření}
+Paměťová náročnost je lineární v délce vstupního řetězce. Při měření programem
+{\em valgrind} byla naměřeno využití heapu zhruba od 1~Kb do 6~Kb podle délky
+funkce, což je přijatelné.
+
+Časová náročnost je zcela minimální, i poměrně dlouhé funkce jsou vyhodnoceny
+během zlomku vteřiny. Uživatel nepocítí žádné zpoždění.
+
 
 
 \begin{thebibliography}{1}
