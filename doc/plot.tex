@@ -238,10 +238,10 @@ Volitelný parametr popisující defiční obor a obor hodnot je analyzován ste
 lexerem, ale má vlastní parsovací funkci.
 
 \section{Uživatelská příručka}
-Překlad ze zdrojových kódů provedeme pomocí příkazu make v kořenovém adresáři.
-Je třeba mít nainstalovaný GNU make nebo jinou verzi make, která je kompatibilní s GNU makefile, je dostupný pro více platforem. Program
-spustíme příkazem ./graph.exe s parametry funkce, výstupní soubor a volitelně
-rozsah osy x a y, jak je naznačeno v~usage stringu programu:
+Překlad ze zdrojových kódů provedeme pomocí příkazu \texttt{make} v kořenovém
+adresáři pro překlad pomocí \texttt{gcc}. Program spustíme příkazem ./graph.exe
+s parametry funkce, výstupní soubor a volitelně rozsah osy x a y, jak je
+naznačeno v~usage stringu programu:
 \begin{verbatim}
 usage: graph.exe FUNCTION FILE [LIMITS]
 \end{verbatim}
@@ -289,10 +289,33 @@ Při chybném vstupu program vypíše typ chyby a ukáže na její pozici ve vst
 řetězci. Někdy může být výpis chyby matoucí, například při chybějící závorce,
 protože je chyba odhalena až na konci.
 
+\subsection{Příklady chybného vstupu}
+\begin{verbatim}
+Missing parenthesis: sin(x))
+                           ^
+Unknown symbol: six(x)
+                ^
+\end{verbatim}
+\begin{verbatim}
+Empty subexpression: (0xdeadbeef - ())
+                                    ^
+\end{verbatim}
+\begin{verbatim}
+Missing second operand: 5 +
+                          ^
+\end{verbatim}
+\begin{verbatim}
+Number expected: -0xdeadbeef:0xbadf00d::-0xfacefeed:0xcafed00d
+                                       ^
+\end{verbatim}
+\begin{verbatim}
+Redundant: -3:3:-2:2:3
+                    ^
+\end{verbatim}
 
-\clearpage
+
 \section{Závěr}
-Pro přehlednost byly zdrojové kódy vzhledově vyčištěny utilitou GNU indent~s
+Pro přehlednost byly zdrojové kódy vzhledově vyčištěny utilitou \texttt{GNU indent}~s
 odsazovacím stylem Kernighan \& Ritchie a~s~volbou odstranění tabulátorů, které
 v některých editorech způsobují potíže.
 
@@ -306,19 +329,20 @@ notation), nicměně tento způsob vypadá komplikovaně, co se týče správné
 zacházení s precedencemi operátorů. Tato metoda by byla náročnější na paměť,
 což může být v prostředí s omezenou pamětí (kapesní kalkulátor) kritické.
 
-Testování proběhlo pro většinu možných případů, všechny dopadly úspěšně. Je
-zajištěno, aby nedocházelo k únikům paměti, přestože paměťová náročnost
-programu je minimální a dealokování celého bloku operačním systémem by bylo
-efektivnější.  Stejně jako v každém softwaru, i zde se můžou objevit drobné
-chyby, prakticky nelze zajistit, aby byl program perfektní. Zadání bylo dle
-mého subjektivního názoru splněno kompletně. Vygenerované grafy jsou esteticky
-hezké a díky použitým metodám i prostorově úsporné. Vzhled grafu a rámečku je
-inspirovaný grafy vygenerovanými programem GNU R, který je často ceněn právě
-pro široký výběr, přehlednost a vzhled svých grafů. 
+Testování proběhlo pro velké množství správných i chybných případů, všechny
+dopadly úspěšně. Je zajištěno, aby nedocházelo k únikům paměti, přestože
+paměťová náročnost programu je minimální a dealokování celého bloku operačním
+systémem by bylo efektivnější.  Stejně jako v každém softwaru, i zde se můžou
+objevit drobné chyby, prakticky nelze zajistit, aby byl program perfektní.
+
+Snažil jsem se splnit zadání kompletně. Vygenerované grafy
+jsou esteticky hezké a díky použitým metodám i prostorově úsporné. Vzhled grafu
+a rámečku je inspirovaný grafy vygenerovanými programem \texttt{GNU R}, který je často
+ceněn právě pro široký výběr, přehlednost a vzhled svých grafů. 
 
 \subsection{Měření}
 Paměťová náročnost je lineární v délce vstupního řetězce. Při měření programem
-{\em valgrind} byla naměřeno využití heapu zhruba od 1~KB do 6~KB podle délky
+\texttt{valgrind} byla naměřeno využití heapu zhruba od 1~KB do 6~KB podle délky
 funkce, což je přijatelné.
 
 Časová náročnost je zcela minimální, i poměrně dlouhé funkce jsou vyhodnoceny
@@ -326,7 +350,6 @@ během zlomku vteřiny. Uživatel nepocítí žádné zpoždění.
 
 
 
-\clearpage
 \begin{thebibliography}{1}
 \bibitem[1]{wikiShunting}
 {\em Wikipedia contributors} \\ 
