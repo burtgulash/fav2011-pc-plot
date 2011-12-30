@@ -6,7 +6,9 @@
 \BOOKMARK [2][-]{subsection.2.4}{Zobrazen\355 grafu}{section.2}
 \BOOKMARK [1][-]{section.3}{Implementace}{}
 \BOOKMARK [2][-]{subsection.3.1}{Lexer}{section.3}
-\BOOKMARK [2][-]{subsection.3.2}{Shunting yard}{section.3}
+\BOOKMARK [2][-]{subsection.3.2}{Parser}{section.3}
+\BOOKMARK [2][-]{subsection.3.3}{Shunting yard}{section.3}
+\BOOKMARK [2][-]{subsection.3.4}{Zobrazen\355 grafu}{section.3}
 \BOOKMARK [1][-]{section.4}{U\236ivatelsk\341 pr\355rucka}{}
 \BOOKMARK [2][-]{subsection.4.1}{Pr\355klady pou\236it\355}{section.4}
 \BOOKMARK [1][-]{section.5}{Z\341ver}{}

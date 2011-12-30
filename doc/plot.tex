@@ -158,7 +158,7 @@ případě chyby posílá chybový token do další fáze.  Token je zde struktu
 která si uchovává pozici a délku nalezeného podřetězce a samotný řetězec pro
 případný výpis chyby.
 
-\paragraph{Parser}
+\subsection{Parser}
 je implementace Shunting yard algoritmu, která navíc kontroluje syntaktické
 chyby. Výsledek je vrácen jako posloupnost symbolů, které ale musí být po
 skončení používání dealokovány. Pro zjednoduššení jsou všechny tokeny a
@@ -214,7 +214,7 @@ konec  & 1 2 3 $\CARET$ / 4 + & & konec, přidáme všechny operátory \\
 \end{tabular}
 \end{center}
 
-\paragraph{Zobrazení grafu}
+\subsection{Zobrazení grafu}
 je zajištěno dalším odděleným modulem. Ten nejprve zkonstruuje hlavičku
 PostScriptového souboru podle specifikace PostScriptu. 
 
