@@ -356,6 +356,9 @@ static void write_axis_units(FILE * out, int horizontal)
             unit_position += unit_size;
     }
 
+    /* Only print this many digits. There is no need for labels to have
+     * more digits printed than necessary. Eg. we want 1.05, not 1.05000
+     */
     if (power < 0)
         print_precision = -(int) power;
 

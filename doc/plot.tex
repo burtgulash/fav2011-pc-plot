@@ -269,7 +269,7 @@ Do souboru vystup.ps je zapsán graf funkce $\sin (1 / x^2)$
 s vestavěným definičním oborem a oborem hodnot $x, y \in [-10, 10]$.
 \begin{figure}[ht!]
 \centering
-	\includegraphics[width=13cm]{figures/test1.eps}
+	\includegraphics[width=10cm, angle=270]{figures/vystup1.eps}
 	\caption{výsledek příkazu, graf funkce $\sin \left(x + 1/x^3 \right) * -x$}
 \end{figure}
 \clearpage
@@ -281,7 +281,7 @@ Stejný příkaz, pouze použije jiný rozsah pro definiční obor ($x \in [-3, 
 obor hodnot ($y \in [-2, 2]$).
 \begin{figure}[ht!]
 \centering
-	\includegraphics[width=13cm]{figures/test2.eps}
+	\includegraphics[width=10cm,angle=270]{figures/vystup2.eps}
 	\caption{výsledek příkazu, graf funkce $\sin \left(x + 1/x^3 \right) * -x$}
 \end{figure}
 
@@ -293,7 +293,7 @@ Při chybném vstupu program vypíše typ chyby a ukáže na její pozici ve vst
 řetězci. Někdy může být výpis chyby matoucí, například při chybějící závorce,
 protože je chyba odhalena až na konci.
 
-\subsection{Příklady chybného vstupu}
+\subsection{Příklady upozornění na chybný vstup}
 \begin{verbatim}
 Missing parenthesis: sin(x))
                            ^
@@ -339,10 +339,10 @@ paměťová náročnost programu je minimální a dealokování celého bloku op
 systémem by bylo efektivnější.  Stejně jako v každém softwaru, i zde se můžou
 objevit drobné chyby, prakticky nelze zajistit, aby byl program perfektní.
 
-Snažil jsem se splnit zadání kompletně. Vygenerované grafy
-jsou esteticky hezké a díky použitým metodám i prostorově úsporné. Vzhled grafu
-a rámečku je inspirovaný grafy vygenerovanými programem \texttt{GNU R}, který je často
-ceněn právě pro široký výběr, přehlednost a vzhled svých grafů. 
+Snažil jsem se splnit zadání kompletně. Vygenerované grafy jsou esteticky hezké
+a díky použitým metodám i prostorově úsporné. Vzhled grafu a rámečku je
+inspirovaný grafy vygenerovanými programem \texttt{GNU R}, který je často ceněn
+právě pro široký výběr, přehlednost a vzhled svých grafů. 
 
 \subsection{Měření}
 Paměťová náročnost je lineární v délce vstupního řetězce. Při měření programem
@@ -350,7 +350,10 @@ Paměťová náročnost je lineární v délce vstupního řetězce. Při měře
 funkce, což je přijatelné.
 
 Časová náročnost je zcela minimální, i poměrně dlouhé funkce jsou vyhodnoceny
-během zlomku vteřiny. Uživatel nepocítí žádné zpoždění.
+během zlomku vteřiny. Uživatel nepocítí žádné zpoždění. Parametry vyhlazonání
+grafu byly voleny tak, aby i pomalejší interpretory PostScriptu vykreslily
+velmi náročné grafy ($sin(1/x^{50})$) poměrně rychle. Je zajištěno, že počet
+úseček nepřekročí limit, který je nastaven na 3000.
 
 
 
