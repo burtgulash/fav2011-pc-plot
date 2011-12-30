@@ -2,4 +2,4 @@ EXEC = graph.exe
 SRCS = main.c lexer.c parser.c func.c plot.c
 
 $(EXEC): $(SRCS)
-	cl $(SRCS) /Fe $(EXEC) 
+	cl $(SRCS) /Fe$(EXEC)

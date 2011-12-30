@@ -294,12 +294,13 @@ static void write_header(FILE * out, char *expression)
     fprintf(out, "%%!PS-Adobe-3.0 EPSF-3.0\n");
     fprintf(out, "%%%%DocumentMedia: Letter %d %d 0 () ()\n",
             LLX + URX, LLY + URY);
-    fprintf(out, "%%%%Title: Plot %s\n", expression);
+    fprintf(out, "%%%%Title: %s\n", expression);
     fprintf(out, "%%%%Creator: Plot utility\n");
     fprintf(out, "%%%%Pages: 1\n");
     fprintf(out, "%%%%Orientation: Landscape\n");
     fprintf(out, "%%%%BoundingBox: %d %d %d %d\n", LLX, LLY, URX, URY);
     fprintf(out, "%%%%EndComments\n\n");
+    fprintf(out, "%%%%Page 1 1\n");
 }
 
 
