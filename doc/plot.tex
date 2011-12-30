@@ -19,7 +19,8 @@
 \begin{titlepage}
 \begin{center}
 	\includegraphics{res/znak_vzor.png} \\[2cm]
-	\huge{Vizualizace grafu matematické funkce} \\[2cm]
+	\huge{Vizualizace grafu matematické funkce} \\[.2cm]
+	\Large{Semestrální práce z předmětu KIV/PC} \\[2cm]
 	\Large{Tomáš Maršálek} \\
 	\large{marsalet@students.zcu.cz} \\[1cm]
 	\normalsize{\today}
@@ -176,6 +177,10 @@ Shunting yard algoritmu a poté při kontrolním průchodu výsledným postfixov
 výrazem, kdy se potvrdí, že výraz bude skutečně možné vyhodnotit. Zde se
 odstraní chyby související s n-aritou operátorů.
 
+Parser se nachází v souboru \texttt{parser.c} a používá pomocný modul
+\texttt{func.c}, který se převážně stará o správné definice a správné přiřazení
+matematických funkcí symbolům.
+
 \subsection{Shunting yard}
 Při konverzi do postfixu musíme mít na paměti přednosti jednotlivých operátorů.
 Výraz $1 + 2 * 3$ se musí přeložit jako $1~2~3~*~+$ a ne jako $1~2~+~3~*$.
@@ -215,8 +220,8 @@ konec  & 1 2 3 $\CARET$ / 4 + & & konec, přidáme všechny operátory \\
 \end{center}
 
 \subsection{Zobrazení grafu}
-je zajištěno dalším odděleným modulem. Ten nejprve zkonstruuje hlavičku
-PostScriptového souboru podle specifikace PostScriptu. 
+je zajištěno dalším odděleným modulem \texttt{plot.c}. Ten nejprve zkonstruuje
+hlavičku PostScriptového souboru podle specifikace PostScriptu. 
 
 Poté je funkce vyhodnocena v klíčových bodech, které jsou poté transformovány
 na souřadnice PostScriptového formátu stránky a spojeny úsečkami tak, jak bylo
@@ -251,9 +256,10 @@ floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem
 Vygenerovaný graf je soubor typu encapsulated PostScript (.eps) verze~3, může
 být použit přímo v typografickém nástroji \LaTeX.
 
+\clearpage
 \subsection{Příklady použití}
 \begin{verbatim}
-graph.exe "sin(x + 1/x^3) * -x" vystup.ps 
+./graph.exe "sin(x + 1/x^3) * -x" vystup.ps 
 \end{verbatim}
 Do souboru vystup.ps je zapsán graf funkce $\sin (1 / x^2)$
 s vestavěným definičním oborem a oborem hodnot $x, y \in [-10, 10]$.
@@ -265,7 +271,7 @@ s vestavěným definičním oborem a oborem hodnot $x, y \in [-10, 10]$.
 \clearpage
 
 \begin{verbatim}
-graph.exe "sin(x + 1/x^3) * -x" vystup.ps -3.4:3.4:-1.2:1.2
+./graph.exe "sin(x + 1/x^3) * -x" vystup.ps -3.4:3.4:-1.2:1.2
 \end{verbatim}
 Stejný příkaz, pouze použije jiný rozsah pro definiční obor ($x \in [-3, 3]$) a
 obor hodnot ($y \in [-2, 2]$).
@@ -284,6 +290,7 @@ Při chybném vstupu program vypíše typ chyby a ukáže na její pozici ve vst
 protože je chyba odhalena až na konci.
 
 
+\clearpage
 \section{Závěr}
 Pro přehlednost byly zdrojové kódy vzhledově vyčištěny utilitou GNU indent~s
 odsazovacím stylem Kernighan \& Ritchie a~s~volbou odstranění tabulátorů, které
@@ -311,7 +318,7 @@ pro široký výběr, přehlednost a vzhled svých grafů.
 
 \subsection{Měření}
 Paměťová náročnost je lineární v délce vstupního řetězce. Při měření programem
-{\em valgrind} byla naměřeno využití heapu zhruba od 1~Kb do 6~Kb podle délky
+{\em valgrind} byla naměřeno využití heapu zhruba od 1~KB do 6~KB podle délky
 funkce, což je přijatelné.
 
 Časová náročnost je zcela minimální, i poměrně dlouhé funkce jsou vyhodnoceny
@@ -319,6 +326,7 @@ během zlomku vteřiny. Uživatel nepocítí žádné zpoždění.
 
 
 
+\clearpage
 \begin{thebibliography}{1}
 \bibitem[1]{wikiShunting}
 {\em Wikipedia contributors} \\ 
