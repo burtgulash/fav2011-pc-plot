@@ -1,3 +1,10 @@
+/*
+ * main.c
+ * 
+ * Entry point for plotting utility.
+ * Serves mainly as file handler and catches basic input errors.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +28,7 @@ static int parse_limits(Limits * limits, char *lim_string)
     if (!limits)
         return 0;
 
+    /* parse all 4 limits */
     for (i = 0; i < 4; i++) {
         if (i > 0) {
             tok = next_tok(lim_string, lim_pos);
@@ -35,6 +43,7 @@ static int parse_limits(Limits * limits, char *lim_string)
 
         sign = 1;
         tok = next_tok(lim_string, lim_pos);
+        /* minus does not bind to a number, it behaves like an unary operator */
         if (tok->type == T_OP && lim_string[tok->pos] == '-') {
             sign = -1;
             lim_pos += tok->len;
@@ -46,6 +55,7 @@ static int parse_limits(Limits * limits, char *lim_string)
         strncpy(tmp, lim_string + tok->pos, tok->len);
         tmp[tok->len] = '\0';
 
+        /* parse number according to its type */
         switch (tok->type) {
         case T_HEX:
         case T_DEC:
@@ -56,6 +66,7 @@ static int parse_limits(Limits * limits, char *lim_string)
         case T_FLOAT:
             *((double *) limits + i) = sign * (double) strtod(tmp, NULL);
             break;
+            /* handle errors by the same function that is used by main parser */
         default:
             (void) parse_error(tok, "Number expected");
             free(tmp);

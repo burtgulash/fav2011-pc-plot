@@ -193,7 +193,7 @@ static void plot(FILE * out, parsed_expr p)
                  * from this point 
                  */
             } else if (last_out) {
-				/* point is too high or too low? */
+                /* point is too high or too low? */
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
                     if (IS_NAN(x_intersect))
@@ -206,7 +206,7 @@ static void plot(FILE * out, parsed_expr p)
                     MOVETO(x_intersect, y_high);
                 }
             }
-			/* Draw a valid line. This plots most of the lines. */
+            /* Draw a valid line. This plots most of the lines. */
             LINETO(x_2, y_2);
 
             last_out = 0;
