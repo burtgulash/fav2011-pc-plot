@@ -34,11 +34,11 @@ provede její analýzu a vytvoří soubor ve formátu PostScript s grafem této
 funkce na zvoleném definičním oboru.
 
 \section{Analýza úlohy}
-Abychom mohli zobrazit graf funkce jako například $f(x) = x * 2 + \sin(x)$,
+Abychom mohli zobrazit graf funkce, jako například $f(x) = x * 2 + \sin(x)$,
 musíme být nejdříve schopni vyhodnotit tuto funkci numericky. Tedy pro
 jakékoliv x chceme redukovat výraz na číslo $y = f(x)$. Vyhodnocování je vhodné
 rozdělit do více fází, protože většina práce spočívá v nalezení chyb ve výrazu.
-Každá z fází se slouží kromě svého hlavního účelu jako filtr pro případné
+Každá z fází se slouží, kromě svého hlavního účelu, jako filtr pro případné
 chyby, které by způsobovaly zbytečné nepříjemnosti ve fázi nadcházející, ta
 poté může předpokládat vstupní řetězec bez chyb. 
 
@@ -46,16 +46,16 @@ poté může předpokládat vstupní řetězec bez chyb.
 Místo abychom při vyhodnocování výrazu postupně hledali čísla nebo operátory,
 ponecháme tuto úlohu specializovanému nástroji, takzvanému scanneru nebo také
 lexeru. Nadefinujeme jednotlivé symboly a necháme scanner, aby je ve vstupním
-řetězci rozpoznal, nebo aby případně rozpoznal lexikální chyby.  Význam celé
-této fáze je v zjednodušení nadcházející fáze, která je složitější, a už se
-nebude muset zabývat problémy typu jestli je symbol skutečně číslo nebo jestli
+řetězci rozpoznal nebo aby případně rozpoznal lexikální chyby.  Význam celé
+této fáze je ve zjednodušení nadcházející fáze, která je složitější, a už se
+nebude muset zabývat problémy typu jestli je symbol skutečně číslo nebo zda
 symbol \uv{sin} je ve skutečnosti \uv{sinh} a podobně.
 
 \subsection{Syntaktická a sémantická analýza}
-Tyto dvě fáze jsou zde kombinované v jednu. Vytvoříme přeloženou datovou
+Tyto dvě fáze jsou zde zkombinované v jednu. Vytvoříme přeloženou datovou
 strukturu, se kterou bude vyhodnocování výrazu víceméně triviální. Syntaktická
 analýza najde chyby týkající se skladby výrazu, jako například dvě čísla nebo
-znaky následující po sobě, chybějící závorky, a podobně. Jednotlivým symbolům
+znaky následující po sobě, chybějící závorky a podobně. Jednotlivým symbolům
 přiřadíme jejich význam, tj. číslům jejich numerickou hodnotu a operátorům
 jejich příslušnou unární nebo binární funkci. 
 
@@ -63,7 +63,7 @@ jejich příslušnou unární nebo binární funkci.
 Výsledná datová struktura je posloupnost symbolů v postfixové nebo také
 reverzní polské notaci. Výhoda tohoto zápisu oproti klasické infixové notaci
 je absence závorek a jednoduchost vyhodnocení výrazu. Při vyhodnocování totiž
-vždy když narazíme na operátor, máme jistotu, že všechny předcházející znaky, 
+vždy, když narazíme na operátor, máme jistotu, že všechny předcházející znaky, 
 které operátor vyžaduje, jsou čísla.
 
 Příklad infixové a postfixové notace.
@@ -90,7 +90,7 @@ náročnosti na paměť.
 
 
 \subsection{Zobrazení grafu}
-Jednoduchým řešením jak zobrazit funkci je vyhodnotit vždy dva sousední body~a
+Jednoduchým řešením, jak zobrazit funkci je vyhodnotit vždy dva sousední body~a
 spojit je úsečkou. Důležité je pouze zvolit dostatečně detailní rozdělení osy
 x, aby graf nebyl kostrbatý.
 
@@ -99,7 +99,7 @@ vyhlazování. Šetření zobrazenými přímkami oceníme zejména u jednoduch�
 funkcí, protože rozhodně nepotřebujeme, aby graf funkce $f(x) = x$ byl stejně
 detailní jako graf funkce $f(x) = sin(1/x)$, který je kolem nuly velmi
 zhuštěný. Taktika je poměrně jednoduchá. Mějme zvolené nějaké počáteční
-rozdělení osy x a pokud při zobrazování jednotlivých úseček zjistíme, že by
+rozdělení osy x, a pokud při zobrazování jednotlivých úseček zjistíme, že by
 došlo k příliš velkému skoku ve sklonu dvou sousedních úseček (výpočetně by
 druhá derivace přesahovala jistý zvolený práh), rozdělíme interval mezi $x_i$
 a $x_{i + 1}$ na polovinu. Samozřejmě musíme mít nějaký limit tohoto půlení,
@@ -125,8 +125,8 @@ jak je vidět v porovnání dvou různých funkcí.
 \clearpage
 Zřejmým problémem jsou funkce, které v některých bodech zadaného intervalu
 rostou limitně do nekonečna, případně nejsou na daném intervalu definovány.
-Případ, kdy funkce pokračuje mimo zadanou hranici, případně až do nekonečna je
-celkem jednoduchý. Aby nedošlo k useklým grafům poblíž dolní nebo horní
+Případ, kdy funkce pokračuje mimo zadanou hranici, případně až do nekonečna, je
+celkem jednoduchý. Aby nedošlo k useknutí grafu poblíž dolní nebo horní
 hranice, stačí vypočítat průsečík horní nebo dolní hranice s úsečkou mezi
 posledním bodem a bodem, který už by byl mimo graf a vést kratší úsečku do
 tohoto průsečíku. 
@@ -145,14 +145,14 @@ matematické knihovně v takových případech vracejí hodnotu NaN. Výpočet
 průsečíku s takovým číslem nedává smysl a předefinování knihovních funkcí na
 vlastní, které by vracely alespoň nekonečna namísto NaN způsobuje jiné
 nežádoucí artefakty. Například předefinování logaritmů pro záporné hodnoty na
-záporné nekonečno funguje dokud nezobrazíme nějakou transformaci tohoto
+záporné nekonečno funguje, dokud nezobrazíme nějakou transformaci tohoto
 logaritmu na reálné hodnoty (např. $f(x) = \exp(\ln(x))$). Pro jednoduchost je
 tedy možná lepší NaN hodnoty pouze nezobrazovat.
 
 
 \section{Implementace}
 \subsection{Lexer} 
-V souboru {\em lexer.c} je konstruován jako deterministický automat, který
+V souboru \texttt{lexer.c} je konstruován jako deterministický automat, který
 rozpoznává celá čísla v šestnáctkové, desítkové a osmičkové soustavě, floating
 point čísla, proměnnou x, operátory a závorky. Mezery jsou zahozeny parserem. V
 případě chyby posílá chybový token do další fáze.  Token je zde struktura,
@@ -184,15 +184,16 @@ matematických funkcí symbolům.
 \subsection{Shunting yard}
 Při konverzi do postfixu musíme mít na paměti přednosti jednotlivých operátorů.
 Výraz $1 + 2 * 3$ se musí přeložit jako $1~2~3~*~+$ a ne jako $1~2~+~3~*$.
-Dále také levou nebo pravou asociaci nekomutativních operátorů, pokud ve výrazů
-chybí závorky.  Například operátor odčítání upřednostňuje levé uzávorkování ($1
+Dále také musíme myslet na levou nebo pravou asociaci nekomutativních
+operátorů, pokud ve výrazů chybí závorky.  Například operátor odčítání
+upřednostňuje levé uzávorkování ($1
 - 2 - 3 = ((1 - 2) - 3)$) oproti umocňování, které naopak upřednostňuje
-uzávorkování zprava ($2~\CARET~3~\CARET~4 = (2~\CARET~(3~\CARET~4)) =
+  uzávorkování zprava ($2~\CARET~3~\CARET~4 = (2~\CARET~(3~\CARET~4)) =
 2^{3^4}$).
 
 Algoritmus používá pomocný zásobník na odkládání operátorů, dokud nemá jistotu
 o jejich správném umístění v postfixu. Čteme infixový výraz zleva doprava po
-jednotlivých symbolech a vždy když narazíme na symbol typu číslo nebo proměnná,
+jednotlivých symbolech a vždy, když narazíme na symbol typu číslo nebo proměnná,
 pouze ho uložíme do výsledné výstupní fronty. Pokud narazíme na operátor,
 všechny operátory, které dosud leží nahoře v zásobníku a vážou se těsněji (mají
 vyšší precedenci) než právě vytažený symbol, můžeme přidat do výsledné fronty.
@@ -223,9 +224,9 @@ konec  & 1 2 3 $\CARET$ / 4 + & & konec, přidáme všechny operátory \\
 je zajištěno dalším odděleným modulem \texttt{plot.c}. Ten nejprve zkonstruuje
 hlavičku PostScriptového souboru podle specifikace PostScriptu. 
 
-Poté je funkce vyhodnocena v klíčových bodech, které jsou poté transformovány
-na souřadnice PostScriptového formátu stránky a spojeny úsečkami tak, jak bylo
-popsáno v analýze úlohy. 
+Poté je funkce vyhodnocena v klíčových bodech, které jsou následně
+transformovány na souřadnice PostScriptového formátu stránky a spojeny úsečkami
+tak, jak bylo popsáno v analýze úlohy. 
 
 Dalším krokem je vytvoření rámečku grafu a pro přehlednost rozdělení obou os.
 Velikost jednotlivých dílků je vybrána tak, aby rozdělení osy nebylo příliš
@@ -247,7 +248,7 @@ usage: graph.exe FUNCTION FILE [LIMITS]
 \end{verbatim}
 
 Aritmetický výraz může obsahovat běžné binární operátory (+,~-,~*,~/,~$\CARET$)
-jednoduché závorky \uv{()}, proměnnou \uv{x}, a funkce které jsou
+jednoduché závorky \uv{()}, proměnnou \uv{x}, a funkce, které jsou
 implementované (jen pod jiným názvem) v knihovně math.h (abs, exp, ln, log,
 sin, cos, tan, asin, acos, atan, sinh, cosh, tanh). Konstanty můžou být zadány
 jako celá čísla v osmičkové, desítkové nebo šestnáctkové soustavě, nebo jako
@@ -282,7 +283,7 @@ obor hodnot ($y \in [-2, 2]$).
 \end{figure}
 
 
-Rozsahy jsou jsou specifikovány dobrovolným parametrem, který má formát
+Rozsahy jsou specifikovány dobrovolným parametrem, který má formát
 x1:x2:y1:y2, kde x1 a y1 musí být menší než x2, respektive y2. 
 
 Při chybném vstupu program vypíše typ chyby a ukáže na její pozici ve vstupním
