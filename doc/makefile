@@ -1,4 +1,4 @@
-latexfile = plot
+latexfile = A10B0632P
 
 TEX = pdflatex
 VIEWER = evince

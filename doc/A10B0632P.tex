@@ -85,7 +85,7 @@ x * $\sin$ (x $\CARET$ 2) & x x 2 $\CARET$ $\sin$ * \\
 \end{center}
 
 Metoda na převedení infixového do postfixového zápisu je např. Dijkstrův
-Shunting yard algoritmus\cite{wikiShunting}\cite{shewchuk}, který je
+shunting yard algoritmus\cite{wikiShunting}\cite{shewchuk}, který je
 standardním postupem díky své jednoduchosti~a výpočetní nenáročnosti. Používají
 ho kapesní kalkulátory~i software určený pro jednoduché výpočty kvůli minimální
 náročnosti na paměť.
@@ -111,21 +111,15 @@ půlení. Stejným výpočtem se snažíme zajistit co nejdelší interval, aby 
 ke zbytečnému plýtvání. 
 
 Rozdělení osy x je o poznání hustší, pokud je graf v tomto místě detailnější,
-jak je vidět v porovnání dvou různých funkcí.
+jak je vidět na obrázku.
 
 \begin{figure}[ht!]
 \centering
-	\includegraphics[width=11cm]{figures/figure2.eps}
-	\caption{Rozdělení osy x grafu funkce $x^3$}
-\end{figure}
-\begin{figure}[ht!]
-\centering
-	\includegraphics[width=11cm]{figures/figure1.eps}
+	\includegraphics[width=10cm]{figures/density.eps}
 	\caption{Rozdělení osy x grafu funkce
 		$\sin \left(x + \cos \left(\frac{1}{x} \right) \right)$}
 \end{figure}
 
-\clearpage
 Zřejmým problémem jsou funkce, které v některých bodech zadaného intervalu
 rostou limitně do nekonečna, případně nejsou na daném intervalu definovány.
 Případ, kdy funkce pokračuje mimo zadanou hranici, případně až do nekonečna, je
@@ -149,8 +143,8 @@ průsečíku s takovým číslem nedává smysl a předefinování knihovních f
 vlastní, které by vracely alespoň nekonečna namísto NaN způsobuje jiné
 nežádoucí artefakty. Například předefinování logaritmů pro záporné hodnoty na
 záporné nekonečno funguje, dokud nezobrazíme nějakou transformaci tohoto
-logaritmu na reálné hodnoty (např. $f(x) = \exp(\ln(x))$). Pro jednoduchost je
-tedy možná lepší NaN hodnoty pouze nezobrazovat.
+logaritmu na reálné hodnoty (například $f(x) = \exp(\ln(x))$). Pro jednoduchost
+je tedy možná lepší NaN hodnoty pouze nezobrazovat.
 
 
 \section{Implementace}
@@ -163,7 +157,7 @@ která si uchovává pozici a délku nalezeného podřetězce a samotný řetěz
 případný výpis chyby.
 
 \subsection{Parser}
-je implementace Shunting yard algoritmu, která navíc kontroluje syntaktické
+je implementace shunting yard algoritmu, která navíc kontroluje syntaktické
 chyby. Výsledek je vrácen jako posloupnost symbolů, které ale musí být po
 skončení používání dealokovány. Pro zjednoduššení jsou všechny tokeny a
 přeložené symboly uchovány v pomocných polích, aby na konci došlo k jejich
@@ -176,7 +170,7 @@ velkému ušetření paměti by rozhodně nedošlo. Zvolil jsem tedy raději či
 kódu. 
 
 Pomocnou datovou strukturu zde tvoří pouze zásobník, který se využívá při
-Shunting yard algoritmu a poté při kontrolním průchodu výsledným postfixovým
+shunting yard algoritmu a poté při kontrolním průchodu výsledným postfixovým
 výrazem, kdy se potvrdí, že výraz bude skutečně možné vyhodnotit. Zde se
 odstraní chyby související s n-aritou operátorů.
 
@@ -204,6 +198,7 @@ Právě vytažený symbol pak pouze vložíme na zásobník. Až nám dojdou vš
 symboly, pouze vytáhneme všechny operátory ze zásobníku a v tomto pořadí je
 přidáme do výsledné fronty. \\
 
+\clearpage
 Jako příklad použijme výraz 1 / 2~$\CARET$~3 + 4.
 \begin{center}
 \begin{tabular}{|c|l|l|r|}
@@ -260,7 +255,6 @@ floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem
 Vygenerovaný graf je soubor typu encapsulated PostScript (.eps) verze~3, může
 být použit přímo v typografickém nástroji \LaTeX.
 
-\clearpage
 \subsection{Příklady použití}
 \begin{verbatim}
 ./graph.exe "sin(x + 1/x^3) * -x" vystup.ps 
