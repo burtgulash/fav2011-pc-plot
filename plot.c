@@ -30,8 +30,8 @@
 /* bounding box LOWER-LEFT and UPPER-RIGHT corners */
 #define LLX 18
 #define LLY 18
-#define URY 594
-#define URX 774
+#define URY 774
+#define URX 594
 
 /* blank space left from each side of a page */
 #define BLANK 50
@@ -117,8 +117,8 @@ static void plot_init(int size, Limits * lims)
 
     /* find scale coefficients from real number coordinates to bounding box
      * coordinates */
-    scale_x = (URX - LLX - 2 * BLANK) / (x_high - x_low);
-    scale_y = (URY - LLY - 2 * BLANK) / (y_high - y_low);
+    scale_x = (URY - LLY - 2 * BLANK) / (x_high - x_low);
+    scale_y = (URX - LLX - 2 * BLANK) / (y_high - y_low);
 }
 
 
@@ -147,14 +147,22 @@ static void plot(FILE * out, parsed_expr p)
 
 
 
-/** real coordinates to postscript plot coordinates transformation **/
-#define COORD_X(x) (((x) - x_low) * scale_x + LLX + BLANK)
-#define COORD_Y(y) (((y) - y_low) * scale_y + LLY + BLANK)
+/* Transformation of real number coordinates to plot box coordinates.
+ * Plot is in lanscape mode, real x-coordinates are mappend to plot 
+ * y-coordinate and vice versa.
+ * Plot y-coordinates are flipped vertically
+ */
+#define COORD_X(x) (((x) - x_low) * scale_x + LLY + BLANK)
+#define COORD_Y(y) (URX - BLANK - (((y) - y_low) * scale_y))
 
+/* Redefine postscript lineto and moveto commands, such that there is 
+ * no need to take care of coordinate transformations.
+ * x and y coordinates are swapped here.
+ */
 #define LINETO(x, y) fprintf(out, "%.3f %.3f lineto\n", \
-                             COORD_X(x), COORD_Y(y))
+                             COORD_Y(y), COORD_X(x))
 #define MOVETO(x, y) fprintf(out, "%.3f %.3f moveto\n", \
-                             COORD_X(x), COORD_Y(y))
+                             COORD_Y(y), COORD_X(x))
 
 /* find intersection with y-boundary */
 #define INTERSECT(boundary) (x_1 + ((boundary) - y_1) * \
@@ -289,7 +297,7 @@ static void write_header(FILE * out, char *expression)
     fprintf(out, "%%%%Title: Plot %s\n", expression);
     fprintf(out, "%%%%Creator: Plot utility\n");
     fprintf(out, "%%%%Pages: 1\n");
-    /* fprintf(out, "%%%%Orientation: Landscape\n"); */
+    fprintf(out, "%%%%Orientation: Landscape\n");
     fprintf(out, "%%%%BoundingBox: %d %d %d %d\n", LLX, LLY, URX, URY);
     fprintf(out, "%%%%EndComments\n\n");
 }
@@ -358,21 +366,23 @@ static void write_axis_units(FILE * out, int horizontal)
     if (horizontal) {
         do {
             MOVETO(unit_position, y_low);
-            fprintf(out, "%d %d rlineto\n", 0, -LINE_LEN);
-            fprintf(out, "%d %d rmoveto\n", 0, -2 * LINE_LEN);
-            fprintf(out, "(%.*f) show\n", print_precision, unit_position);
-
-            unit_position += unit_size;
-        } while (unit_position <= x_high);
-        /* in case of vertical axis, do the same, only rotate the labels */
-    } else {
-        do {
-            MOVETO(x_low, unit_position);
-            fprintf(out, "%d %d rlineto\n", -LINE_LEN, 0);
-            fprintf(out, "%d %d rmoveto\n", -2 * LINE_LEN, 0);
+            fprintf(out, "%d %d rlineto\n", LINE_LEN, 0);
+            fprintf(out, "%d %d rmoveto\n", 2 * LINE_LEN, 0);
             fprintf(out, "90 rotate\n");
             fprintf(out, "(%.*f) show\n", print_precision, unit_position);
             fprintf(out, "-90 rotate\n");
+
+            unit_position += unit_size;
+        } while (unit_position <= x_high);
+        /* case of vertical axis, rotate more */
+    } else {
+        do {
+            MOVETO(x_low, unit_position);
+            fprintf(out, "%d %d rlineto\n", 0, -LINE_LEN);
+            fprintf(out, "%d %d rmoveto\n", 0, -2 * LINE_LEN);
+            fprintf(out, "180 rotate\n");
+            fprintf(out, "(%.*f) show\n", print_precision, unit_position);
+            fprintf(out, "-180 rotate\n");
 
             unit_position += unit_size;
         } while (unit_position <= y_high);
