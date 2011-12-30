@@ -220,7 +220,7 @@ parsed_expr parse(char *expr)
                     (x) == T_DEC || (x) == T_FLOAT)
 
         switch (t->type) {
-		/* tokens holding numbers are handled first */
+            /* tokens holding numbers are handled first */
         case T_HEX:
         case T_DEC:
         case T_OCT:
@@ -249,8 +249,8 @@ parsed_expr parse(char *expr)
             ENQUEUE(sym);
             break;
 
-		/* function token is already checked to correspond to a function by
-         * lexer. math_fun() gives this token its eval() function. */
+            /* function token is already checked to correspond to a function by
+             * lexer. math_fun() gives this token its eval() function. */
         case T_FUN:
             if (NUMERIC(last) || last == T_FUN || last == T_RPAREN)
                 SYNTAX_ERROR();
@@ -260,7 +260,7 @@ parsed_expr parse(char *expr)
             PUSH(sym);
             break;
 
-		/* case of operator */
+            /* case of operator */
         case T_OP:
             if (last == T_FUN)
                 SYNTAX_ERROR();
@@ -273,7 +273,7 @@ parsed_expr parse(char *expr)
                 SYNTAX_ERROR();
 
 
-			/* Shunting yard algorithm loop, holds operators until they
+            /* Shunting yard algorithm loop, holds operators until they
              * are ready to be popped off based on their precedence and
              * associativity. */
             while (sp > 0 && PEEK()->type == OP) {
@@ -307,11 +307,11 @@ parsed_expr parse(char *expr)
                 return parse_error(t, "Empty subexpression");
             }
 
-			/* pop off every symbol that is not left parenthesis */
+            /* pop off every symbol that is not left parenthesis */
             while (sp > 0 && PEEK()->type != LPAREN)
                 ENQUEUE(POP());
 
-			/* closing parenthesis was expected, but is missing */
+            /* closing parenthesis was expected, but is missing */
             if (sp == 0) {
                 free(queue);
                 free(tmp);
@@ -321,21 +321,21 @@ parsed_expr parse(char *expr)
             sym = POP();
             break;
 
-        /* Colon is never used here, its purpose is as separator in 
-         * 'limits' string. Treat is as an error. */
+            /* Colon is never used here, its purpose is as separator in 
+             * 'limits' string. Treat is as an error. */
         case T_COLON:
         case T_ERROR:
             free(queue);
             free(tmp);
             return parse_error(t, "Unknown symbol");
 
-        /* Ignore all whitespaces. */
+            /* Ignore all whitespaces. */
         case T_SPACE:
             i += t->len;
             free(tmp);
             continue;
 
-        /* Break out of loop if done. */
+            /* Break out of loop if done. */
         case T_EOF:
             eof = 1;
             break;
@@ -358,6 +358,6 @@ parsed_expr parse(char *expr)
 
 #undef ENQUEUE
 
-	/* perform last check and catch remaining errors before returning result */
+    /* perform last check and catch remaining errors before returning result */
     return check(qp, queue);
 }

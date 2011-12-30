@@ -188,11 +188,12 @@ static void plot(FILE * out, parsed_expr p)
             if (last_nan) {
                 MOVETO(x_2, y_2);
                 last_nan = 0;
-            /* handle case where last point was out of box, 
-             * find intersections with box. Next line will start
-             * from this point 
-             */
+                /* handle case where last point was out of box, 
+                 * find intersections with box. Next line will start
+                 * from this point 
+                 */
             } else if (last_out) {
+				/* point is too high or too low? */
                 if (y_2 > y_1) {
                     x_intersect = INTERSECT(y_low);
                     if (IS_NAN(x_intersect))
@@ -205,12 +206,13 @@ static void plot(FILE * out, parsed_expr p)
                     MOVETO(x_intersect, y_high);
                 }
             }
+			/* Draw a valid line. This plots most of the lines. */
             LINETO(x_2, y_2);
 
             last_out = 0;
             /* case where next point is out of the box */
         } else {
-			/* if last point was in the box, stroke a line to the intersection
+            /* if last point was in the box, stroke a line to the intersection
              * with y-boundary */
             if (!last_out && !last_nan) {
                 if (y_2 > y_1) {
@@ -230,7 +232,9 @@ static void plot(FILE * out, parsed_expr p)
         }
 
 /** smoothing procedure **/
-/* SLOPE_JUMP is numerically evaluated second derivative */
+/* SLOPE_JUMP is numerically evaluated second derivative, that is 
+ * difference of first derivatives. Expression is simplified algebraically
+ */
 #define SLOPE_JUMP (y_2 - y_1 - ((y_1 - old_y)*(x_2 - x_1))/(x_1 - old_x))
 #define TOO_SHARP() (fabs(SLOPE_JUMP) > THRESHOLD)
 #define TOO_SMOOTH() (fabs(SLOPE_JUMP) < THRESHOLD / 4)
@@ -242,7 +246,9 @@ static void plot(FILE * out, parsed_expr p)
         x_2 = x_1 + delta;
         y_2 = evaluate(p, x_2);
 
-        /* if plot is too sharp or too smooth, find appropriate smoothness lvl 
+        /* If the plot is too sharp or too smooth, 
+         * find appropriate smoothness lvl 
+         * by increasing/decreasing smoothness until right one is found.
          */
         if (TOO_SHARP()) {
             while (SMOOTHNESS_LVL < MAX_SMOOTHNESS_LVL && TOO_SHARP()) {
@@ -314,8 +320,11 @@ static void write_axis_units(FILE * out, int horizontal)
     else
         size = y_high - y_low;
 
-    /* find scale of corresponding axis */
+    /* Find scale of corresponding axis such that there will be no more than
+     * MAX_UNITS labels.
+     */
     power = ceil(log10(size / (MAX_UNITS - 1)) - 1);
+
     /* try all three allowed subdivisions (1, 2, 5) */
     if (size / (2 * pow(10, power)) < (MAX_UNITS - 1))
         axis_scale = 2;
@@ -355,7 +364,7 @@ static void write_axis_units(FILE * out, int horizontal)
 
             unit_position += unit_size;
         } while (unit_position <= x_high);
-	/* in case of vertical axis, do the same, only rotate the labels */
+        /* in case of vertical axis, do the same, only rotate the labels */
     } else {
         do {
             MOVETO(x_low, unit_position);

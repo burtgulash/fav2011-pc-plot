@@ -215,10 +215,10 @@ konec  & 1 2 3 $\CARET$ / 4 + & & konec, přidáme všechny operátory \\
 
 \paragraph{Zobrazení grafu}
 je zajištěno dalším odděleným modulem. Ten nejprve zkonstruuje hlavičku
-postscriptového souboru podle specifikace postscriptu. 
+PostScriptového souboru podle specifikace PostScriptu. 
 
 Poté je funkce vyhodnocena v klíčových bodech, které jsou poté transformovány
-na souřadnice postscriptového formátu stránky a spojeny úsečkami tak, jak bylo
+na souřadnice PostScriptového formátu stránky a spojeny úsečkami tak, jak bylo
 popsáno v analýze úlohy. 
 
 Dalším krokem je vytvoření rámečku grafu a pro přehlednost rozdělení obou os.
@@ -226,15 +226,16 @@ Velikost jednotlivých dílků je vybrána tak, aby rozdělení osy nebylo pří
 husté ani řídké, a podle konvence, že dílky mají velikost pouze 1, 2 nebo 5
 krát mocnina deseti.
 
-Nakonec jsou zapsány závěrečné postscriptové příkazy a soubor je uzavřen.
+Nakonec jsou zapsány závěrečné PostScriptové příkazy a soubor je uzavřen.
 
 Volitelný parametr popisující defiční obor a obor hodnot je analyzován stejným
 lexerem, ale má vlastní parsovací funkci.
 
 \section{Uživatelská příručka}
 Překlad ze zdrojových kódů provedeme pomocí příkazu make v kořenovém adresáři.
-Program spustíme příkazem ./graph.exe s parametry funkce, výstupní
-soubor a volitelně rozsah osy x a y, jak je naznačeno v~usage stringu programu:
+Je třeba mít nainstalovaný GNU make, je dostupný pro více platforem. Program
+spustíme příkazem ./graph.exe s parametry funkce, výstupní soubor a volitelně
+rozsah osy x a y, jak je naznačeno v~usage stringu programu:
 \begin{verbatim}
 usage: graph.exe FUNCTION FILE [LIMITS]
 \end{verbatim}
@@ -246,7 +247,7 @@ sin, cos, tan, asin, acos, atan, sinh, cosh, tanh). Konstanty můžou být zadá
 jako celá čísla v osmičkové, desítkové nebo šestnáctkové soustavě, nebo jako
 floating point čísla v desítkové soustavě (tak jak jsou rozpoznány jazykem~C).
 
-Vygenerovaný graf je soubor typu encapsulated postscript (.eps) verze~3, může
+Vygenerovaný graf je soubor typu encapsulated PostScript (.eps) verze~3, může
 být použit přímo v typografickém nástroji \LaTeX.
 
 \subsection{Příklady použití}
