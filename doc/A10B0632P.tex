@@ -41,7 +41,7 @@ Abychom mohli zobrazit graf funkce, jako například $f(x) = x * 2 + \sin(x)$,
 musíme být nejdříve schopni vyhodnotit tuto funkci numericky. Tedy pro
 jakékoliv x chceme redukovat výraz na číslo $y = f(x)$. Vyhodnocování je vhodné
 rozdělit do více fází, protože většina práce spočívá v nalezení chyb ve výrazu.
-Každá z fází se slouží, kromě svého hlavního účelu, jako filtr pro případné
+Každá z fází slouží, kromě svého hlavního účelu, jako filtr pro případné
 chyby, které by způsobovaly zbytečné nepříjemnosti ve fázi nadcházející, ta
 poté může předpokládat vstupní řetězec bez chyb. 
 
@@ -272,8 +272,8 @@ s vestavěným definičním oborem a oborem hodnot $x, y \in [-10, 10]$.
 \begin{verbatim}
 ./graph.exe "sin(x + 1/x^3) * -x" vystup.ps -3.4:3.4:-1.2:1.2
 \end{verbatim}
-Stejný příkaz, pouze použije jiný rozsah pro definiční obor ($x \in [-3, 3]$) a
-obor hodnot ($y \in [-2, 2]$).
+Stejný příkaz, pouze použije jiný rozsah pro definiční obor ($x \in [-3.4,
+3.4]$) a obor hodnot ($y \in [-1.2, 1.2]$).
 \begin{figure}[ht!]
 \centering
 	\includegraphics[width=10cm,angle=270]{figures/vystup2.eps}
