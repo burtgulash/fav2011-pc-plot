@@ -19,7 +19,7 @@ typedef struct {
     token *tok;
     /* symbol can hold either number or operator */
     double number;
-    Operator op;
+    Operator *op;
 } symbol;
 
 /* reduced set of symbol types (subset of token types) */

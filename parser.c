@@ -7,6 +7,7 @@
  * expression is thus guaranteed to be evaluable.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,8 +59,11 @@ void dispose(parsed_expr p)
     int i;
     for (i = 0; i < num_tok; i++)
         free(tokens[i]);
-    for (i = 0; i < num_sym; i++)
+    for (i = 0; i < num_sym; i++) {
+        if (symbols[i]->op != NULL)
+            free(symbols[i]->op);
         free(symbols[i]);
+    }
 
     if (p.expr)
         free(p.expr);
@@ -91,10 +95,12 @@ parsed_expr parse_error(token * tok, const char *error_msg)
 static symbol *make_symbol(int type, token * tok, double number)
 {
     symbol *sym = (symbol *) malloc(sizeof(symbol));
+    assert(sym);
 
     sym->type = type;
     sym->tok = tok;
     sym->number = number;
+    sym->op = NULL;
 
     symbols[num_sym++] = sym;
 
@@ -137,7 +143,7 @@ static parsed_expr check(int length, symbol ** queue)
                 EVAL_ERROR("Number or variable expected");
 
 
-            if (sym->op.binary) {
+            if (sym->op->binary) {
                 if (sp <= 0)
                     EVAL_ERROR("Missing second operand");
 
@@ -203,7 +209,10 @@ parsed_expr parse(char *expr)
         t = next_tok(expr, i);
         tokens[num_tok++] = t;
 
+        /* temporary storage for token substring */
         tmp = (char *) malloc(sizeof(char) * (t->len + 1));
+        assert(tmp);
+
         strncpy(tmp, expr + t->pos, t->len);
         tmp[t->len] = '\0';
 
@@ -269,7 +278,7 @@ parsed_expr parse(char *expr)
             sym->op = match_operator(tmp[0], last);
 
             /* exclude unary minus */
-            if (sym->op.binary && (last == T_OP || last == T_LPAREN))
+            if (sym->op->binary && (last == T_OP || last == T_LPAREN))
                 SYNTAX_ERROR();
 
 
@@ -277,11 +286,11 @@ parsed_expr parse(char *expr)
              * are ready to be popped off based on their precedence and
              * associativity. */
             while (sp > 0 && PEEK()->type == OP) {
-                if (PEEK()->op.assoc == LEFT &&
-                    PEEK()->op.prec >= sym->op.prec)
+                if (PEEK()->op->assoc == LEFT &&
+                    PEEK()->op->prec >= sym->op->prec)
                     ENQUEUE(POP());
-                else if (PEEK()->op.assoc == RIGHT &&
-                         PEEK()->op.prec > sym->op.prec)
+                else if (PEEK()->op->assoc == RIGHT &&
+                         PEEK()->op->prec > sym->op->prec)
                     ENQUEUE(POP());
                 else
                     break;

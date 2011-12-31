@@ -6,6 +6,7 @@
  * by function next_tok. End of file is returned after the expression
  * is depleted.
  */
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -43,6 +44,7 @@ enum { ZERO, DOT, FRAC, DEC, XX, EE, OCT, HEX, EXP, EXP_SIGN,
 static token *make_tok(int type, int pos, int len, char *context)
 {
     token *tok = (token *) malloc(sizeof(token));
+    assert(tok);
 
     tok->type = type;
     tok->pos = pos;

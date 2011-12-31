@@ -79,11 +79,11 @@ static double evaluate(parsed_expr p, double x)
         switch (sym->type) {
         case OP:
             a = POP();
-            if (sym->op.binary) {
+            if (sym->op->binary) {
                 b = POP();
-                PUSH((sym->op.eval) (b, a));
+                PUSH((sym->op->eval) (b, a));
             } else
-                PUSH((sym->op.eval) (a, 0));
+                PUSH((sym->op->eval) (a, 0));
             break;
 
             /* nothing special happens in case of numbers and variables */

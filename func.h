@@ -9,12 +9,12 @@
 /* Creates Operator symbol from character c. 
  * 'last' token is used to detect unary minus.
  */
-Operator match_operator(char c, int last);
+Operator *match_operator(char c, int last);
 
 /* Create Operator symbol given valid function string.
  * String checking should already be performed by lexer.
  */
-Operator match_fun(char *fun_str);
+Operator *match_fun(char *fun_str);
 
 /* associativity of operator */
 enum { LEFT, RIGHT };

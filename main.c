@@ -5,6 +5,7 @@
  * Serves mainly as file handler and catches basic input errors.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,6 +53,8 @@ static int parse_limits(Limits * limits, char *lim_string)
         }
 
         tmp = (char *) malloc(sizeof(char) * (tok->len + 1));
+        assert(tmp);
+
         strncpy(tmp, lim_string + tok->pos, tok->len);
         tmp[tok->len] = '\0';
 
@@ -128,6 +131,8 @@ int main(int argc, char **argv)
             } else {
                 /* try to parse limits */
                 lims = (Limits *) malloc(sizeof(Limits));
+                assert(lims);
+
                 if (parse_limits(lims, argv[3])) {
                     plot_file = fopen(argv[2], "w");
                     if (plot_file != NULL) {
