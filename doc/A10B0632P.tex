@@ -238,9 +238,10 @@ lexerem, ale má vlastní parsovací funkci.
 
 \section{Uživatelská příručka}
 Překlad ze zdrojových kódů provedeme pomocí příkazu \texttt{make} v kořenovém
-adresáři pro překlad pomocí \texttt{gcc}. Program spustíme příkazem ./graph.exe
-s parametry funkce, výstupní soubor a volitelně rozsah osy x a y, jak je
-naznačeno v~usage stringu programu:
+adresáři pro překlad pomocí \texttt{gcc}. Chceme-li použít \texttt{MS Visual
+Studio}, přeložíme příkazem \texttt{nmake -f Makefile.win}.  Program spustíme v
+konzoli exekucí souboru graph.exe s parametry funkce, výstupní soubor a
+volitelně rozsah osy x a y, jak je naznačeno v~usage stringu programu:
 \begin{verbatim}
 usage: graph.exe FUNCTION FILE [LIMITS]
 \end{verbatim}
@@ -276,7 +277,7 @@ obor hodnot ($y \in [-2, 2]$).
 \begin{figure}[ht!]
 \centering
 	\includegraphics[width=10cm,angle=270]{figures/vystup2.eps}
-	\caption{výsledek příkazu, graf funkce $\sin \left(x + 1/x^3 \right) * -x$}
+	\caption{graf funkce $\sin \left(x + 1/x^3 \right) * -x$, pouze s jiným rozsahem}
 \end{figure}
 
 
@@ -287,6 +288,7 @@ Při chybném vstupu program vypíše typ chyby a ukáže na její pozici ve vst
 řetězci. Někdy může být výpis chyby matoucí, například při chybějící závorce,
 protože je chyba odhalena až na konci.
 
+\clearpage
 \subsection{Příklady upozornění na chybný vstup}
 \begin{verbatim}
 Missing parenthesis: sin(x))
