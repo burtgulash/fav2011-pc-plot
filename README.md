@@ -1,7 +1,7 @@
 # Graph - plotting utility for mathematical functions
 
 Seminar assignment from course **Programming in C**.
-Aim of this assignment is to make a program to produce vector function plots
+Aim of this assignment is to make a program in ANSI C to produce vector function plots
 in postscript of single variable functions. I made it so that the resulting 
 plots are visually similar to plots produced by R language.
 
