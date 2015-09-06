@@ -1,9 +1,9 @@
 # Graph - plotting utility for mathematical functions
 
-Seminar assignment from course **Programming in C** (Fakulta Aplikovaných Věd ZČU
-PLzeň - KIV/PC zima 2011). Aim of this assignment is to make a program to
-produce vector function plots in postscript of single variable functions.  I
-made it so that it is visually similar to plots produced by R language.
+Seminar assignment from course **Programming in C**.
+Aim of this assignment is to make a program to produce vector function plots
+in postscript of single variable functions. I made it so that the resulting 
+plots are visually similar to plots produced by R language.
 
 ## Usage
 ```
@@ -51,4 +51,9 @@ ps2pdf out.ps out.pdf
 
 ## Documentation
 For full documentation in czech language see [A10B0632P.pdf](doc/A10B0632P.pdf).
+
+## Course details
+* [KIV/PC](http://www.kiv.zcu.cz/studies/predmety/pc/) fall 2011
+* Lecturer [Ing. Kamil Ekštein, Ph.D.](https://www.kiv.zcu.cz/cz/katedra/osoby-seznam/osoba-detail.html?login=kekstein)
+* Faculty of Applied Sciences - University of West Bohemia (Fakulta Aplikovaných Věd - ZČU Plzeň)
 
