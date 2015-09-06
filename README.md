@@ -1,6 +1,6 @@
 # Graph - plotting utility for mathematical functions
 
-Seminar assignment from course *Programming in C* (Fakulta Aplikovaných Věd ZČU
+Seminar assignment from course **Programming in C** (Fakulta Aplikovaných Věd ZČU
 PLzeň - KIV/PC zima 2011). Aim of this assignment is to make a program to
 produce vector function plots in postscript of single variable functions.  I
 made it so that it is visually similar to plots produced by R language.
@@ -10,10 +10,10 @@ made it so that it is visually similar to plots produced by R language.
 usage: ./graph FUNCTION FILE [LIMITS]
 ```
 
-Run the program with arithmetic *function* as a first parameter. This function
-might contain a single variable *x*, no other letters are recognized. Use
-output *FILE* ending in .ps as a second parameter and optionally use third
-parameter to specify *LIMITS* of the plot. Default boundaries are from -10 to
+Run the program with arithmetic **function** as a first parameter. This function
+might contain a single variable **x**, no other letters are recognized. Use
+output **FILE** ending in .ps as a second parameter and optionally use third
+parameter to specify **LIMITS** of the plot. Default boundaries are from -10 to
 10 for both x and y axes.
 
 Syntax for LIMITS:
