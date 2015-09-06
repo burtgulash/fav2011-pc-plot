@@ -8,9 +8,10 @@ plots are visually similar to plots produced by R language.
 ## Features
 * Parsing using Shunting Yard algorithm
 * Boundary clipping - calculate intersections of generated lines with plot boundary and clip them
-* Density adaptation - the bigger the first derivative of a function in certain region, the more points in this region
 * Support for common operators (+, -, *, /, ^) and common math functions (abs, exp, ln, log,
     sin, cos, tan, asin, acos, atan, sinh, cosh, tanh)
+* Adaptative smoothing - the bigger the first derivative of a function in certain region, the more points in this region
+* Axis units automatically adapted to be multiples of 1, 2 or 5
 
 
 ## Usage
