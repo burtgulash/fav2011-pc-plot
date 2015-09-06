@@ -11,7 +11,7 @@ plots are visually similar to plots produced by R language.
 * Support for common operators (+, -, *, /, ^) and common math functions (abs, exp, ln, log,
     sin, cos, tan, asin, acos, atan, sinh, cosh, tanh)
 * Adaptative smoothing - the bigger the first derivative of a function in certain region, the more points in this region
-* Axis units automatically adapted to be multiples of 1, 2 or 5
+* Axis units automatically adapted to be multiples of 1, 2 or 5 for a given scale
 
 
 ## Usage
