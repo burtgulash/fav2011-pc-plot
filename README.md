@@ -22,7 +22,7 @@ x_min:x_max:y_min:y_max
 ```
 
 To convert the plot from ps to pdf use utility
-(ps2pdf)[https://www.ps2pdf.com/] which should be easily available for your
+[ps2pdf](https://www.ps2pdf.com/) which should be easily available for your
 linux distribution.
 
 ```
@@ -32,20 +32,22 @@ ps2pdf out.ps out.pdf
 
 ## Examples
 
-With default boundaries
+### 1. With default boundaries
 ```
-    ./graph "sin(x + 1/x^3) * -x" out.ps
-```
-
-![sin(x + 1/x^3) * -x with x in range -10 to 10](pics/ex1.png)
-
-User defined boundaries
-```
-    ./graph "sin(x + 1/x^3) * -x" out.ps -3.4:3.4:-1.2:1.2
+./graph "sin(x + 1/x^3) * -x" out.ps
 ```
 
-![sin(x + 1/x^3) * -x with x in range -3.4 to 3.4](pics/ex2.png)
+![sin(x + 1/x^3) * -x with x in range -10 to 10|width=400px](pics/ex1.png)
+
+
+### 2. User defined boundaries
+```
+./graph "sin(x + 1/x^3) * -x" out.ps -3.4:3.4:-1.2:1.2
+```
+
+![sin(x + 1/x^3) * -x with x in range -3.4 to 3.4|width=400px](pics/ex2.png)
+
 
 ## Documentation
-For full documentation in czech language see (A10B0632P.pdf)[doc/A10B0632P.pdf].
+For full documentation in czech language see [A10B0632P.pdf](doc/A10B0632P.pdf).
 
