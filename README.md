@@ -37,7 +37,7 @@ ps2pdf out.ps out.pdf
 ./graph "sin(x + 1/x^3) * -x" out.ps
 ```
 
-![sin(x + 1/x^3) * -x with x in range -10 to 10|width=400px](pics/ex1.png)
+![sin(x + 1/x^3) * -x with x in range -10 to 10](pics/ex1.png|width=400px)
 
 
 ### 2. User defined boundaries
@@ -45,7 +45,7 @@ ps2pdf out.ps out.pdf
 ./graph "sin(x + 1/x^3) * -x" out.ps -3.4:3.4:-1.2:1.2
 ```
 
-![sin(x + 1/x^3) * -x with x in range -3.4 to 3.4|width=400px](pics/ex2.png)
+![sin(x + 1/x^3) * -x with x in range -3.4 to 3.4](pics/ex2.png|width=400px)
 
 
 ## Documentation
