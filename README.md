@@ -5,6 +5,12 @@ Aim of this assignment is to make a program in ANSI C to produce vector function
 in postscript of single variable functions. I made it so that the resulting 
 plots are visually similar to plots produced by R language.
 
+## Features
+* Parsing using Shunting Yard algorithm
+* Boundary clipping - calculate intersections of generated lines with plot boundary and clip them
+* Density adaptation - the bigger the first derivative of a function in certain region, the more points in this region
+
+
 ## Usage
 ```
 usage: ./graph FUNCTION FILE [LIMITS]
@@ -50,7 +56,8 @@ ps2pdf out.ps out.pdf
 
 
 ## Documentation
-For full documentation in czech language see [A10B0632P.pdf](doc/A10B0632P.pdf).
+For full documentation describing details of implementation in czech language
+see [A10B0632P.pdf](doc/A10B0632P.pdf).
 
 ## Course details
 * [KIV/PC](http://www.kiv.zcu.cz/studies/predmety/pc/) fall 2011
